@@ -41,6 +41,8 @@ function M.get_line(bufnr, line_idx) return vim.api.nvim_buf_get_lines(bufnr, li
 function M.get_rainbow_hl(idx, hl_groups) return hl_groups[(math.floor(idx)) % #hl_groups + 1] end
 
 M.is_buf_blocked = function(buf)
+  if vim.g.indent_guide == false or vim.b.indent_guide == false then return true end
+
   local filetype = vim.api.nvim_get_option_value('filetype', { buf = buf })
   local is_blocked_filetype = blocked_filetypes[filetype] ~= nil
 

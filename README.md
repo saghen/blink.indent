@@ -9,6 +9,7 @@
 ```lua
 {
   'saghen/blink.indent',
+  main = 'blink.indent',
   opts = {
     -- or disable with `vim.g.indent_guide = false` (global) or `vim.b.indent_guide = false` (per-buffer)
     blocked = {

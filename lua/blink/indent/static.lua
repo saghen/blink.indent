@@ -24,7 +24,7 @@ M.partial_draw = function(ns, line_indents, bufnr, start_line, end_line, left_of
     if indent_level > 0 then
       local virt_text = string.rep(symbol, indent_level)
 
-      local success, symbol_offset_index = pcall(vim.str_byteindex, symbol, left_offset)
+      local success, symbol_offset_index = pcall(vim.str_byteindex, symbol, 'utf-8', left_offset)
       if not success then goto continue end
       virt_text = virt_text:sub(symbol_offset_index + 1)
       local hl_group = utils.get_rainbow_hl(indent_level, config.static.highlights)

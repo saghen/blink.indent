@@ -3,6 +3,7 @@ local M = {}
 local config = require('blink.indent.config')
 local utils = require('blink.indent.utils')
 
+--- TODO: don't redraw if nothing changed
 M.partial_draw = function(ns, indent_levels, bufnr, start_line, end_line, min_start_line, max_end_line, left_offset)
   local shiftwidth = utils.get_shiftwidth(bufnr)
   local symbol = config.scope.char

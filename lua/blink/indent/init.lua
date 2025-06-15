@@ -3,20 +3,19 @@
 
 local M = {}
 
---- @param opts IndentConfig
+--- @param opts blink.indent.Config
 M.setup = function(opts)
   local config = require('blink.indent.config')
   config.setup(opts)
   M.setup_hl_groups()
 
-  local ns = vim.api.nvim_create_namespace('indent')
-
+  local ns = vim.api.nvim_create_namespace('blink_indent')
   vim.api.nvim_set_decoration_provider(ns, {
     on_win = function(_, winnr, bufnr)
       local utils = require('blink.indent.utils')
 
       vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-      if not config.visible or utils.is_buf_blocked(bufnr) then return end
+      if utils.is_buf_blocked(bufnr) then return end
 
       local range = utils.get_win_scroll_range(winnr)
       if range.end_line == range.start_line then return end
@@ -120,32 +119,27 @@ end
 --- Enables the visibility of indent guides
 --- @return boolean success Returns true if state changed, false if already enabled
 M.enable = function()
-  local config = require('blink.indent.config')
-
-  if config.visible then
+  if vim.g.indent_guide ~= false then
     -- Already enabled
     return false
   end
 
-  config.visible = true
-
+  vim.g.indent_guide = true
   return true
 end
 
 --- Disables the visibility of indent guides
 --- @return boolean success Returns true if state changed, false if already disabled
 M.disable = function()
-  local config = require('blink.indent.config')
-
-  if not config.visible then
+  if vim.g.indent_guide == false then
     -- Already disabled
     return false
   end
 
-  config.visible = false
-  local ns = vim.api.nvim_create_namespace('indent')
+  vim.g.indent_guide = false
 
   -- Clear indent markers from all buffers
+  local ns = vim.api.nvim_create_namespace('blink_indent')
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
     if vim.api.nvim_buf_is_valid(buf) then vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1) end
   end
@@ -156,8 +150,8 @@ end
 --- Toggles the visibility of indent guides
 --- @return boolean new_state Returns the new visibility state
 M.toggle = function()
-  local config = require('blink.indent.config')
-  return config.visible and M.disable() or M.enable()
+  if vim.g.indent_guide ~= false then return M.disable() end
+  return M.enable()
 end
 
 return M

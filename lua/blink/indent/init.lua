@@ -9,11 +9,12 @@ M.setup = function(opts)
   config.setup(opts)
   M.setup_hl_groups()
 
-  local utils = require('blink.indent.utils')
   local ns = vim.api.nvim_create_namespace('indent')
 
   vim.api.nvim_set_decoration_provider(ns, {
     on_win = function(_, winnr, bufnr)
+      local utils = require('blink.indent.utils')
+
       vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
       if not config.visible or utils.is_buf_blocked(bufnr) then return end
 

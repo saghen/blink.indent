@@ -20,22 +20,6 @@ function M.get_shiftwidth(bufnr)
   return math.max(shiftwidth, 2)
 end
 
-function M.get_line_indent_level(bufnr, line_number, shiftwidth)
-  local line = M.get_line(bufnr, line_number)
-
-  local whitespace_chars = line:match('^%s*')
-  local whitespace_char_count = string.len(string.gsub(whitespace_chars, '\t', string.rep(' ', shiftwidth)))
-
-  return whitespace_char_count / shiftwidth, #whitespace_chars == #line
-end
-
-function M.get_indent_level(line, shiftwidth)
-  local whitespace_chars = line:match('^%s*')
-  local whitespace_char_count = string.len(string.gsub(whitespace_chars, '\t', string.rep(' ', shiftwidth)))
-
-  return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
-end
-
 function M.get_line(bufnr, line_idx) return vim.api.nvim_buf_get_lines(bufnr, line_idx - 1, line_idx, false)[1] end
 
 function M.get_rainbow_hl(idx, hl_groups) return hl_groups[(math.floor(idx)) % #hl_groups + 1] end

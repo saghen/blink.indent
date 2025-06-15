@@ -5,12 +5,6 @@ local M = {}
 
 --- @param opts IndentConfig
 M.setup = function(opts)
-  -- todo: could also check filetype/buftype to see if the indents would be enabled
-  vim.api.nvim_create_autocmd('BufEnter', { callback = function() M.internal_setup(opts) end, once = true })
-end
-
---- @param opts IndentConfig
-M.internal_setup = function(opts)
   local config = require('blink.indent.config')
   config.setup(opts)
   M.setup_hl_groups()
@@ -152,9 +146,7 @@ M.disable = function()
 
   -- Clear indent markers from all buffers
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(buf) then
-      vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-    end
+    if vim.api.nvim_buf_is_valid(buf) then vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1) end
   end
 
   return true

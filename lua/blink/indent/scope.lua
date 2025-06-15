@@ -19,18 +19,19 @@ M.partial_draw = function(ns, indent_levels, bufnr, start_line, end_line, min_st
   -- highlight the line above the first line if it has a lower indent level
   -- and we didn't start from that line
   if start_line > 1 and not starting_from_next_line then
+    -- underline highlighting
     if previous_indent_level < indent_level and config.scope.underline.enabled then
       local line = vim.api.nvim_buf_get_lines(bufnr, start_line - 2, start_line - 1, false)[1]
       local whitespace_chars = line:match('^%s*')
-      vim.api.nvim_buf_add_highlight(
+      vim.hl.range(
         bufnr,
         ns,
         utils.get_rainbow_hl(previous_indent_level, config.scope.underline.highlights),
-        start_line - 2,
-        #whitespace_chars,
-        -1
+        { start_line - 2, #whitespace_chars },
+        { start_line - 2, -1 }
       )
     end
+
     indent_level = previous_indent_level
   elseif starting_from_next_line then
     indent_level = previous_indent_level

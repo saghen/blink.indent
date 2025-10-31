@@ -60,3 +60,12 @@ or toggle on a per-buffer basis with `indent.enable(not indent.is_enabled({ bufn
     },
   },
 }
+```
+
+`vim.pack`
+
+```lua
+vim.pack.add({ 'saghen/blink.indent' })
+-- plugin initializes automatically, optionally configure
+require('blink.indent').setup({})
+```

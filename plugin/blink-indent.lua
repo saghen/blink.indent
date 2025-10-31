@@ -27,43 +27,43 @@ vim.api.nvim_create_autocmd('ColorScheme', { group = augroup, callback = setup_h
 
 --- highlighter
 
-local ns = vim.api.nvim_create_namespace('blink.indent')
-vim.api.nvim_set_decoration_provider(ns, {
-  on_win = function(_, winnr, bufnr)
-    local config = require('blink.indent.config')
-    local indent = require('blink.indent.indent')
-    local utils = require('blink.indent.utils')
+local function draw(winnr, bufnr)
+  local config = require('blink.indent.config')
+  local indent = require('blink.indent.indent')
+  local utils = require('blink.indent.utils')
 
-    vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-    if not require('blink.indent').is_enabled({ bufnr = bufnr }) then return end
+  local static_ns = vim.api.nvim_create_namespace('blink.indent.static')
+  local scope_ns = vim.api.nvim_create_namespace('blink.indent.scope')
+  if not require('blink.indent').is_enabled({ bufnr = bufnr }) then
+    vim.api.nvim_buf_clear_namespace(bufnr, static_ns, 0, -1)
+    vim.api.nvim_buf_clear_namespace(bufnr, scope_ns, 0, -1)
+    return
+  end
 
-    local range = utils.get_win_scroll_range(winnr)
-    if range.end_line == range.start_line then return end
+  local range = utils.get_win_scroll_range(winnr)
+  if range.end_line == range.start_line then return end
 
-    local indent_levels, scope_range = indent.get_indent_levels(winnr, range.bufnr, range.start_line, range.end_line)
-    if config.static.enabled then
-      require('blink.indent.static').partial_draw(
-        ns,
-        indent_levels,
-        range.bufnr,
-        range.start_line,
-        range.end_line,
-        range.horizontal_offset
-      )
-    end
-    if config.scope.enabled then
-      require('blink.indent.scope').partial_draw(
-        ns,
-        indent_levels,
-        range.bufnr,
-        scope_range[1],
-        scope_range[2],
-        range.start_line,
-        range.end_line,
-        range.horizontal_offset
-      )
-    end
-  end,
+  local indent_levels, scope_range = indent.get_indent_levels(winnr, bufnr, range.start_line, range.end_line)
+
+  if config.static.enabled then
+    require('blink.indent.static').partial_draw(static_ns, indent_levels, bufnr, range)
+  else
+    vim.api.nvim_buf_clear_namespace(range.bufnr, static_ns, 0, -1)
+  end
+
+  if config.scope.enabled then
+    require('blink.indent.scope').partial_draw(scope_ns, indent_levels, bufnr, scope_range, range)
+  else
+    vim.api.nvim_buf_clear_namespace(bufnr, scope_ns, 0, -1)
+  end
+end
+
+vim.api.nvim_set_decoration_provider(vim.api.nvim_create_namespace('blink.indent'), {
+  on_win = function(_, winnr, bufnr) draw(winnr, bufnr) end,
+})
+vim.api.nvim_create_autocmd('CursorMoved', {
+  group = augroup,
+  callback = function() draw(vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()) end,
 })
 
 --- per-buffer filetype/buftype disabling
@@ -88,4 +88,3 @@ end
 
 vim.api.nvim_create_autocmd('FileType', { group = augroup, callback = set_buf_enabled })
 vim.api.nvim_create_autocmd('OptionSet', { group = augroup, pattern = 'buftype', callback = set_buf_enabled })
-

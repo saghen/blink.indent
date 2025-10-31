@@ -1,15 +1,50 @@
+local utils = require('blink.indent.utils')
+
 local M = {}
 
---- TODO: possible to cache this?
+local cache = {}
+vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
+  group = vim.api.nvim_create_augroup('blink.indent', { clear = false }),
+  callback = function(args) cache[args.buf] = nil end,
+})
+
 --- @param winnr number
 --- @param bufnr number
 --- @param start_line number
 --- @param end_line number
 --- @return table<number, number> indent_levels
---- @return [number, number] scope_range
+--- @return { start_line: number, end_line: number } scope_range
 function M.get_indent_levels(winnr, bufnr, start_line, end_line)
-  local utils = require('blink.indent.utils')
+  local cache_entry = cache[bufnr]
+  local cursor = vim.api.nvim_win_get_cursor(winnr)
+  if
+    cache_entry ~= nil
+    and cache_entry.changedtick == vim.b[bufnr].changedtick
+    and cache_entry.start_line == start_line
+    and cache_entry.end_line == end_line
+    and cache_entry.cursor[1] == cursor[1]
+  then
+    return cache_entry.indent_levels, cache_entry.scope_range
+  end
+  local indent_levels, scope_range = M._get_indent_levels(winnr, bufnr, start_line, end_line)
+  cache[bufnr] = {
+    indent_levels = indent_levels,
+    changedtick = vim.b[bufnr].changedtick,
+    scope_range = scope_range,
+    start_line = start_line,
+    end_line = end_line,
+    cursor = cursor,
+  }
+  return indent_levels, scope_range
+end
 
+--- @param winnr number
+--- @param bufnr number
+--- @param start_line number
+--- @param end_line number
+--- @return table<number, number> indent_levels
+--- @return { start_line: number, end_line: number } scope_range
+function M._get_indent_levels(winnr, bufnr, start_line, end_line)
   local indent_levels = {}
   local shiftwidth = utils.get_shiftwidth(bufnr)
 
@@ -56,7 +91,7 @@ function M.get_indent_levels(winnr, bufnr, start_line, end_line)
     end
   end
 
-  return indent_levels, { scope_start_line, scope_end_line }
+  return indent_levels, { start_line = scope_start_line, end_line = scope_end_line }
 end
 
 --- @param line string
@@ -76,7 +111,6 @@ end
 --- @return number indent_level
 --- @return boolean is_all_whitespace
 function M.get_line_indent_level(bufnr, line_number, shiftwidth)
-  local utils = require('blink.indent.utils')
   local line = utils.get_line(bufnr, line_number)
 
   local whitespace_chars = line:match('^%s*')

@@ -1,9 +1,3 @@
---- @class blink.indent.BlockedConfig
---- @field buftypes string[]
---- @field filetypes string[]
-
---- @class (exact) blink.indent.BlockedConfigPartial : blink.indent.BlockedConfig, {}
-
 --- @class blink.indent.StaticConfig
 --- @field enabled boolean
 --- @field char string
@@ -29,33 +23,16 @@
 --- @class (exact) blink.indent.ScopeUnderlineConfigPartial : blink.indent.ScopeUnderlineConfig, {}
 
 --- @class blink.indent.ConfigStrict
---- @field blocked blink.indent.BlockedConfig
 --- @field static blink.indent.StaticConfig
 --- @field scope blink.indent.ScopeConfig
 
 --- @class (exact) blink.indent.Config : blink.indent.ConfigStrict, {}
---- @field blocked blink.indent.BlockedConfigPartial
 --- @field static blink.indent.StaticConfigPartial
 --- @field scope blink.indent.ScopeConfigPartial
 
 local config = {
   --- @type blink.indent.ConfigStrict
   default = {
-    blocked = {
-      buftypes = { 'terminal', 'quickfix', 'nofile', 'prompt' },
-      filetypes = {
-        'lspinfo',
-        'packer',
-        'checkhealth',
-        'help',
-        'man',
-        'gitcommit',
-        'TelescopePrompt',
-        'TelescopeResults',
-        'dashboard',
-        '',
-      },
-    },
     static = {
       enabled = true,
       char = '▎',

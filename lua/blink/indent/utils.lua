@@ -1,17 +1,5 @@
 local M = {}
 
-local config = require('blink.indent.config')
-
-local blocked_filetypes = {}
-for _, ft in ipairs(config.blocked.filetypes) do
-  blocked_filetypes[ft] = true
-end
-
-local blocked_buftypes = {}
-for _, buftype in ipairs(config.blocked.buftypes) do
-  blocked_buftypes[buftype] = true
-end
-
 function M.get_shiftwidth(bufnr)
   local shiftwidth = vim.api.nvim_get_option_value('shiftwidth', { buf = bufnr })
   -- todo: is this correct?
@@ -23,18 +11,6 @@ end
 function M.get_line(bufnr, line_idx) return vim.api.nvim_buf_get_lines(bufnr, line_idx - 1, line_idx, false)[1] end
 
 function M.get_rainbow_hl(idx, hl_groups) return hl_groups[(math.floor(idx)) % #hl_groups + 1] end
-
-M.is_buf_blocked = function(buf)
-  if vim.g.indent_guide == false or vim.b.indent_guide == false then return true end
-
-  local filetype = vim.api.nvim_get_option_value('filetype', { buf = buf })
-  local is_blocked_filetype = blocked_filetypes[filetype] ~= nil
-
-  local buftype = vim.api.nvim_get_option_value('buftype', { buf = buf })
-  local is_blocked_buftype = blocked_buftypes[buftype] ~= nil
-
-  return is_blocked_filetype or is_blocked_buftype
-end
 
 M.get_win_scroll_range = function(winnr)
   local bufnr = vim.api.nvim_win_get_buf(winnr)

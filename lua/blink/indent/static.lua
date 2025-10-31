@@ -3,30 +3,7 @@ local M = {}
 local config = require('blink.indent.config')
 local utils = require('blink.indent.utils')
 
-local cache = {}
-vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
-  group = vim.api.nvim_create_augroup('blink.indent.static', { clear = false }),
-  callback = function(args) cache[args.buf] = nil end,
-})
-
 M.partial_draw = function(ns, indent_levels, bufnr, range)
-  --- don't redraw if nothing changed
-  local cache_entry = cache[bufnr]
-  if
-    cache_entry ~= nil
-    and cache_entry.indent_levels == indent_levels
-    and cache_entry.changedtick == vim.b[bufnr].changedtick
-    and cache_entry.range.start_line == range.start_line
-    and cache_entry.range.end_line == range.end_line
-  then
-    return
-  end
-  cache[bufnr] = {
-    indent_levels = indent_levels,
-    changedtick = vim.b[bufnr].changedtick,
-    range = range,
-  }
-
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
   local shiftwidth = utils.get_shiftwidth(bufnr)

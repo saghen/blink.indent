@@ -30,45 +30,45 @@
 --- @field static blink.indent.StaticConfigPartial
 --- @field scope blink.indent.ScopeConfigPartial
 
-local config = {
-  --- @type blink.indent.ConfigStrict
-  default = {
-    static = {
-      enabled = true,
-      char = '▎',
-      priority = 1,
-      highlights = { 'BlinkIndent' },
+--- @type blink.indent.ConfigStrict
+local default_config = {
+  static = {
+    enabled = true,
+    char = '▎',
+    priority = 1,
+    highlights = { 'BlinkIndent' },
+  },
+  scope = {
+    enabled = true,
+    char = '▎',
+    priority = 1024,
+    highlights = {
+      'BlinkIndentOrange',
+      'BlinkIndentViolet',
+      'BlinkIndentBlue',
+      -- 'BlinkIndentRed',
+      -- 'BlinkIndentCyan',
+      -- 'BlinkIndentYellow',
+      -- 'BlinkIndentGreen',
     },
-    scope = {
-      enabled = true,
-      char = '▎',
-      priority = 1024,
+    underline = {
+      enabled = false,
       highlights = {
-        'BlinkIndentOrange',
-        'BlinkIndentViolet',
-        'BlinkIndentBlue',
-        -- 'BlinkIndentRed',
-        -- 'BlinkIndentCyan',
-        -- 'BlinkIndentYellow',
-        -- 'BlinkIndentGreen',
-      },
-      underline = {
-        enabled = false,
-        highlights = {
-          'BlinkIndentOrangeUnderline',
-          'BlinkIndentVioletUnderline',
-          'BlinkIndentBlueUnderline',
-          -- 'BlinkIndentRedUnderline',
-          -- 'BlinkIndentCyanUnderline',
-          -- 'BlinkIndentYellowUnderline',
-          -- 'BlinkIndentGreenUnderline',
-        },
+        'BlinkIndentOrangeUnderline',
+        'BlinkIndentVioletUnderline',
+        'BlinkIndentBlueUnderline',
+        -- 'BlinkIndentRedUnderline',
+        -- 'BlinkIndentCyanUnderline',
+        -- 'BlinkIndentYellowUnderline',
+        -- 'BlinkIndentGreenUnderline',
       },
     },
   },
 }
 
+local config = default_config
+
 --- @param opts blink.indent.Config
-function config.setup(opts) config = vim.tbl_deep_extend('force', config.default, opts or {}) end
+function config.setup(opts) config = vim.tbl_deep_extend('force', default_config, opts or {}) end
 
 return setmetatable(config, { __index = function(_, k) return config[k] end })

@@ -52,12 +52,12 @@ function M._get_indent_levels(winnr, bufnr, start_line, end_line)
 
   local cursor_line = vim.api.nvim_win_get_cursor(winnr)[1]
 
-  local scope_indent_level = M.get_indent_level(utils.get_line(bufnr, cursor_line), shiftwidth)
+  local scope_indent_level = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
   local scope_next_line = utils.get_line(bufnr, cursor_line + 1)
   local scope_next_indent_level = scope_next_line ~= nil and M.get_indent_level(scope_next_line, shiftwidth)
     or scope_indent_level
 
-  -- start from the next line if it's indent level its higher
+  -- start from the next line if its indent level its higher
   local starting_from_next_line = scope_next_indent_level > scope_indent_level
   if starting_from_next_line then
     cursor_line = cursor_line + 1
@@ -118,7 +118,7 @@ function M.get_line_indent_level(bufnr, line_number, shiftwidth)
   local whitespace_chars = line:match('^%s*')
   local whitespace_char_count = string.len(string.gsub(whitespace_chars, '\t', string.rep(' ', shiftwidth)))
 
-  return whitespace_char_count / shiftwidth, #whitespace_chars == #line
+  return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
 end
 
 return M

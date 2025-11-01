@@ -9,7 +9,8 @@ local M = {}
 --- @param opts blink.indent.Config
 M.setup = function(opts)
   require('blink.indent.config').setup(opts)
-  vim.api.nvim__redraw({ flush = true })
+  require('blink.indent.indent').clear_cache()
+  vim.api.nvim__redraw({ valid = false })
 end
 
 --- Enables or disables visibility of indent guides

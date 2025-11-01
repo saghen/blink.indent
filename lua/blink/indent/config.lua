@@ -31,7 +31,7 @@
 --- @field scope blink.indent.ScopeConfigPartial
 
 --- @type blink.indent.ConfigStrict
-local default_config = {
+local config = {
   static = {
     enabled = true,
     char = '▎',
@@ -66,9 +66,7 @@ local default_config = {
   },
 }
 
-local config = default_config
-
 --- @param opts blink.indent.Config
-function config.setup(opts) config = vim.tbl_deep_extend('force', default_config, opts or {}) end
+local function setup(opts) config = vim.tbl_deep_extend('force', config, opts or {}) end
 
-return setmetatable(config, { __index = function(_, k) return config[k] end })
+return setmetatable({}, { __index = function(_, k) return k == 'setup' and setup or config[k] end })

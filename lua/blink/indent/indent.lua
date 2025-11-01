@@ -7,6 +7,7 @@ vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
   group = vim.api.nvim_create_augroup('blink.indent', { clear = false }),
   callback = function(args) cache[args.buf] = nil end,
 })
+function M.clear_cache() cache = {} end
 
 --- @param winnr number
 --- @param bufnr number

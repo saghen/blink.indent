@@ -18,9 +18,14 @@ M.partial_draw = function(ns, indent_levels, bufnr, scope_range, range)
   local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
   local starting_from_next_line = cursor_line + 1 == scope_range.start_line
 
+  -- HACK: we always use one indent level higher than the current one
+  -- but on the first line, we have no higher line to look at, so we
+  -- subtract one from the indent level
+  if scope_range.start_line == 1 and not starting_from_next_line then
+    indent_level = math.max(indent_level - 1, 0)
   -- highlight the line above the first line if it has a lower indent level
   -- and we didn't start from that line
-  if scope_range.start_line > 1 and not starting_from_next_line then
+  elseif scope_range.start_line > 1 and not starting_from_next_line then
     -- underline highlighting
     if previous_indent_level < indent_level and config.scope.underline.enabled then
       local line = vim.api.nvim_buf_get_lines(bufnr, scope_range.start_line - 2, scope_range.start_line - 1, false)[1]

@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: git-cliff/CHANGELOG.md

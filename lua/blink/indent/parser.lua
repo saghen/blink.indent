@@ -7,7 +7,6 @@ vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
   group = vim.api.nvim_create_augroup('blink.indent', { clear = false }),
   callback = function(args) cache[args.buf] = nil end,
 })
-function M.clear_cache() cache = {} end
 
 --- @param winnr number
 --- @param bufnr number
@@ -19,8 +18,10 @@ function M.clear_cache() cache = {} end
 function M.get_indent_levels(winnr, bufnr, start_line, end_line)
   local cache_entry = cache[bufnr]
   local cursor = vim.api.nvim_win_get_cursor(winnr)
+  local shiftwidth = utils.get_shiftwidth(bufnr)
   if
     cache_entry ~= nil
+    and cache_entry.shiftwidth == shiftwidth
     and cache_entry.changedtick == vim.b[bufnr].changedtick
     and cache_entry.start_line == start_line
     and cache_entry.end_line == end_line
@@ -28,9 +29,10 @@ function M.get_indent_levels(winnr, bufnr, start_line, end_line)
   then
     return cache_entry.indent_levels, cache_entry.scope_range, true
   end
-  local indent_levels, scope_range = M._get_indent_levels(winnr, bufnr, start_line, end_line)
+  local indent_levels, scope_range = M._get_indent_levels(bufnr, start_line, end_line, shiftwidth, cursor[1])
   cache[bufnr] = {
     indent_levels = indent_levels,
+    shiftwidth = shiftwidth,
     changedtick = vim.b[bufnr].changedtick,
     scope_range = scope_range,
     start_line = start_line,
@@ -40,17 +42,15 @@ function M.get_indent_levels(winnr, bufnr, start_line, end_line)
   return indent_levels, scope_range, false
 end
 
---- @param winnr number
 --- @param bufnr number
 --- @param start_line number
 --- @param end_line number
+--- @param shiftwidth number
+--- @param cursor_line number
 --- @return table<number, number> indent_levels
 --- @return { start_line: number, end_line: number } scope_range
-function M._get_indent_levels(winnr, bufnr, start_line, end_line)
+function M._get_indent_levels(bufnr, start_line, end_line, shiftwidth, cursor_line)
   local indent_levels = {}
-  local shiftwidth = utils.get_shiftwidth(bufnr)
-
-  local cursor_line = vim.api.nvim_win_get_cursor(winnr)[1]
 
   local scope_indent_level = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
   local scope_next_line = utils.get_line(bufnr, cursor_line + 1)

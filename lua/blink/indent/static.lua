@@ -3,7 +3,7 @@ local M = {}
 local config = require('blink.indent.config')
 local utils = require('blink.indent.utils')
 
-M.partial_draw = function(ns, indent_levels, bufnr, range)
+M.draw = function(ns, indent_levels, bufnr, range)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
   local shiftwidth = utils.get_shiftwidth(bufnr)

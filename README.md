@@ -32,6 +32,13 @@ or toggle on a per-buffer basis with `indent.enable(not indent.is_enabled({ bufn
 
 ```lua
 require('blink.indent').setup({
+  blocked = {
+    -- default: 'terminal', 'quickfix', 'nofile', 'prompt'
+    buftypes = { include_defaults = true },
+    -- default: 'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit',
+    --          'TelescopePrompt', 'TelescopeResults', 'dashboard', ''
+    filetypes = { include_defaults = true },
+  },
   static = {
     enabled = true,
     char = '▎',
@@ -45,28 +52,15 @@ require('blink.indent').setup({
     char = '▎',
     priority = 1024,
     -- set this to a single highlight, such as 'BlinkIndent' to disable rainbow-style indent guides
-    -- highlights = { 'BlinkIndent' },
-    highlights = {
-      'BlinkIndentOrange',
-      'BlinkIndentViolet',
-      'BlinkIndentBlue',
-      -- 'BlinkIndentRed',
-      -- 'BlinkIndentCyan',
-      -- 'BlinkIndentYellow',
-      -- 'BlinkIndentGreen',
+    -- highlights = { 'BlinkIndentScope' },
+    -- optionally add: 'BlinkIndentRed', 'BlinkIndentCyan', 'BlinkIndentYellow', 'BlinkIndentGreen'
+    highlights = { 'BlinkIndentOrange', 'BlinkIndentViolet', 'BlinkIndentBlue' }
     },
     underline = {
       -- enable to show underlines on the line above the current scope
       enabled = false,
-      highlights = {
-        'BlinkIndentOrangeUnderline',
-        'BlinkIndentVioletUnderline',
-        'BlinkIndentBlueUnderline',
-        -- 'BlinkIndentRedUnderline',
-        -- 'BlinkIndentCyanUnderline',
-        -- 'BlinkIndentYellowUnderline',
-        -- 'BlinkIndentGreenUnderline',
-      },
+      -- optionally add: 'BlinkIndentRedUnderline', 'BlinkIndentCyanUnderline', 'BlinkIndentYellowUnderline', 'BlinkIndentGreenUnderline'
+      highlights = { 'BlinkIndentOrangeUnderline', 'BlinkIndentVioletUnderline', 'BlinkIndentBlueUnderline' },
     },
   },
 })

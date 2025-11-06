@@ -1,5 +1,9 @@
--- Adds a virtual text to the left of the line to show the indent level
+-- Adds virtual text to the left of the line to show the indent level
 -- Somewhat equivalent to indent-blankline but fast
+
+local config = require('blink.indent.config')
+local parser = require('blink.indent.parser')
+local utils = require('blink.indent.utils')
 
 --- @class blink.indent.Filter
 --- @field bufnr? number
@@ -8,8 +12,7 @@ local M = {}
 
 --- @param opts blink.indent.Config
 M.setup = function(opts)
-  require('blink.indent.config').setup(opts)
-  require('blink.indent.indent').clear_cache()
+  config.setup(opts)
   vim.api.nvim__redraw({ valid = false })
 end
 
@@ -29,14 +32,58 @@ M.enable = function(enable, filter)
   vim.api.nvim__redraw({ valid = false })
 end
 
+--- @param winnr number
+--- @param bufnr number
+M.draw = function(winnr, bufnr)
+  if not M.is_enabled({ bufnr = bufnr }) then
+    vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)
+    vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
+    return
+  end
+
+  local range = utils.get_win_scroll_range(winnr, bufnr)
+  -- if range.end_line == range.start_line then return end
+
+  local indent_levels, scope_range, is_cached = parser.get_indent_levels(winnr, bufnr, range.start_line, range.end_line)
+
+  if config.static.enabled and not is_cached then
+    require('blink.indent.static').draw(config.static.ns, indent_levels, bufnr, range)
+  elseif not config.static.enabled then
+    vim.api.nvim_buf_clear_namespace(range.bufnr, config.static.ns, 0, -1)
+  end
+
+  if config.scope.enabled and not is_cached then
+    require('blink.indent.scope').draw(config.scope.ns, indent_levels, bufnr, scope_range, range)
+  elseif not config.scope.enabled then
+    vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
+  end
+end
+
+-- stylua: ignore
+local default_blocked_filetypes = {
+  'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit',
+  'TelescopePrompt', 'TelescopeResults', 'dashboard', ''
+}
+local default_blocked_buftypes = { 'terminal', 'quickfix', 'nofile', 'prompt' }
+
 --- @param filter blink.indent.Filter?
 M.is_enabled = function(filter)
-  if filter ~= nil and filter.bufnr ~= nil and vim.b[filter.bufnr].indent_guide ~= nil then
-    if filter.bufnr == 0 then filter.bufnr = vim.api.nvim_get_current_buf() end
-    return vim.b[filter.bufnr].indent_guide == true
-  else
-    return vim.g.indent_guide ~= false
+  if filter ~= nil and filter.bufnr ~= nil then
+    local bufnr = filter.bufnr == 0 and vim.api.nvim_get_current_buf() or filter.bufnr
+
+    if vim.b[filter.bufnr].indent_guide ~= nil then return vim.b[filter.bufnr].indent_guide == true end
+
+    if
+      (config.blocked.buftypes.include_defaults and vim.tbl_contains(default_blocked_buftypes, vim.bo[bufnr].buftype))
+      or (#config.blocked.buftypes > 0 and vim.tbl_contains(config.blocked.buftypes, vim.bo.buftype))
+      or (config.blocked.filetypes.include_defaults and vim.tbl_contains(default_blocked_filetypes, vim.bo.filetype))
+      or (#config.blocked.filetypes > 0 and vim.tbl_contains(config.blocked.filetypes, vim.bo.filetype))
+    then
+      return false
+    end
   end
+
+  return vim.g.indent_guide ~= false
 end
 
 return M

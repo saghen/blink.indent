@@ -39,8 +39,7 @@ require('blink.indent').setup({
   blocked = {
     -- default: 'terminal', 'quickfix', 'nofile', 'prompt'
     buftypes = { include_defaults = true },
-    -- default: 'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit',
-    --          'TelescopePrompt', 'TelescopeResults', 'dashboard', ''
+    -- default: 'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit', 'dashboard', ''
     filetypes = { include_defaults = true },
   },
   static = {

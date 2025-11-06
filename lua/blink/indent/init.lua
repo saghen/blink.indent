@@ -57,11 +57,7 @@ M.draw = function(winnr, bufnr)
   end
 end
 
--- stylua: ignore
-local default_blocked_filetypes = {
-  'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit',
-  'TelescopePrompt', 'TelescopeResults', 'dashboard', ''
-}
+local default_blocked_filetypes = { 'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit', 'dashboard', '' }
 local default_blocked_buftypes = { 'terminal', 'quickfix', 'nofile', 'prompt' }
 
 --- @param filter blink.indent.Filter?

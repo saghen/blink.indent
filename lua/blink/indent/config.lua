@@ -1,6 +1,6 @@
 --- @class blink.indent.BlockedConfig
 --- @field buftypes blink.indent.ListWithDefaults defaults: 'terminal', 'quickfix', 'nofile', 'prompt'
---- @field filetypes blink.indent.ListWithDefaults defaults: 'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit', 'TelescopePrompt', 'TelescopeResults', 'dashboard', ''
+--- @field filetypes blink.indent.ListWithDefaults defaults: 'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit', 'dashboard', ''
 
 --- @class blink.indent.ListWithDefaults
 --- @field include_defaults boolean

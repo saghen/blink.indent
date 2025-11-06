@@ -71,11 +71,12 @@ M.is_enabled = function(filter)
 
     if vim.b[filter.bufnr].indent_guide ~= nil then return vim.b[filter.bufnr].indent_guide == true end
 
+    local blocked = config.blocked
     if
-      (config.blocked.buftypes.include_defaults and vim.tbl_contains(default_blocked_buftypes, vim.bo[bufnr].buftype))
-      or (#config.blocked.buftypes > 0 and vim.tbl_contains(config.blocked.buftypes, vim.bo.buftype))
-      or (config.blocked.filetypes.include_defaults and vim.tbl_contains(default_blocked_filetypes, vim.bo.filetype))
-      or (#config.blocked.filetypes > 0 and vim.tbl_contains(config.blocked.filetypes, vim.bo.filetype))
+      (blocked.buftypes.include_defaults and vim.tbl_contains(default_blocked_buftypes, vim.bo[bufnr].buftype))
+      or (#blocked.buftypes > 0 and vim.tbl_contains(blocked.buftypes, vim.bo[bufnr].buftype))
+      or (blocked.filetypes.include_defaults and vim.tbl_contains(default_blocked_filetypes, vim.bo[bufnr].filetype))
+      or (#blocked.filetypes > 0 and vim.tbl_contains(blocked.filetypes, vim.bo[bufnr].filetype))
     then
       return false
     end

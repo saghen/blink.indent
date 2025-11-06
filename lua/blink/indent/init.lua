@@ -42,8 +42,6 @@ M.draw = function(winnr, bufnr)
   end
 
   local range = utils.get_win_scroll_range(winnr, bufnr)
-  -- if range.end_line == range.start_line then return end
-
   local indent_levels, scope_range, is_cached = parser.get_indent_levels(winnr, bufnr, range.start_line, range.end_line)
 
   if config.static.enabled and not is_cached then

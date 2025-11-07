@@ -6,6 +6,8 @@
 
 <img width="900" src="https://github.com/user-attachments/assets/275dbac8-0f2a-4703-ac01-58152afc2c92" alt="Screenshot" />
 
+*code from [frizbee](https://github.com/saghen/frizbee)*
+
 ## Install
 
 ```lua

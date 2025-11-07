@@ -2,7 +2,7 @@
   <h2 align="center">Blink Indent (blink.indent)</h2>
 </p>
 
-**blink.indent** provides indent guides with scope on every keystroke (0.1-2ms per render), including on massive files, without Treesitter in ~500 LoC. These indent guides work in the vast majority of valid code and compute quicker (~10x) than via Treesitter. If you want something more feature rich, consider using [indent-blankline](https://github.com/lukas-reineke/indent-blankline.nvim) instead.
+**blink.indent** provides indent guides with scope on every keystroke (0.1-2ms per render), including on massive files, in ~500 LoC. These indent guides work in the vast majority of valid code and compute quicker (~10x) than via Treesitter. If you want something more feature rich, consider using [indent-blankline](https://github.com/lukas-reineke/indent-blankline.nvim) instead.
 
 <img width="900" src="https://github.com/user-attachments/assets/275dbac8-0f2a-4703-ac01-58152afc2c92" alt="Screenshot" />
 

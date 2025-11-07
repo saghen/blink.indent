@@ -8,7 +8,6 @@
 
 --- @class (exact) blink.indent.BlockedConfigPartial : blink.indent.BlockedConfig, {}
 
----
 --- @class blink.indent.StaticConfig
 --- @field enabled boolean
 --- @field ns number Namespace of the extmarks used to draw the static guides

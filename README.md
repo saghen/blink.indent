@@ -27,7 +27,7 @@ vim.pack.add({ 'saghen/blink.indent' })
 
 Note that calling `setup` is optional, as the plugin will automatically initialize with the default configuration.
 
-Disable with `vim.g.indent_guide = false` (global) or `vim.b[bufnr].indent_guide = false` (per-buffer). Some filetypes and buftypes are disabled by default, see the bottom of `plugin/blink-indent.lua`. You may also create a keymap to toggle visibility like so:
+Disable with `vim.g.indent_guide = false` (global) or `vim.b[bufnr].indent_guide = false` (per-buffer). Some filetypes and buftypes are disabled by default, see below. You may also create a keymap to toggle visibility like so:
 
 ```lua
 local indent = require('blink.indent')

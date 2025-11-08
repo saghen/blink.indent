@@ -26,9 +26,13 @@ M.draw = function(ns, indent_levels, bufnr, range)
     if indent_level > 0 then
       local virt_text = string.rep(symbol, indent_level)
 
-      local success, symbol_offset_index = pcall(vim.str_byteindex, symbol, 'utf-8', range.horizontal_offset)
-      if not success then goto continue end
-      virt_text = virt_text:sub(symbol_offset_index + 1)
+      if range.horizontal_offset > 0 then
+        local success, symbol_offset_index = pcall(vim.str_byteindex, symbol, 'utf-32', range.horizontal_offset)
+        -- TODO: drop goto
+        if not success then goto continue end
+        virt_text = virt_text:sub(symbol_offset_index + 1)
+      end
+
       local hl_group = utils.get_rainbow_hl(indent_level, config.static.highlights)
       vim.api.nvim_buf_set_extmark(bufnr, ns, line_number - 1, 0, {
         virt_text = { { virt_text, hl_group } },

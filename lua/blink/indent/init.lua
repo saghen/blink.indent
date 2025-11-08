@@ -65,7 +65,7 @@ M.is_enabled = function(filter)
   if filter ~= nil and filter.bufnr ~= nil then
     local bufnr = filter.bufnr == 0 and vim.api.nvim_get_current_buf() or filter.bufnr
 
-    if vim.b[filter.bufnr].indent_guide ~= nil then return vim.b[filter.bufnr].indent_guide == true end
+    if vim.b[bufnr].indent_guide ~= nil then return vim.b[bufnr].indent_guide == true end
 
     local blocked = config.blocked
     if

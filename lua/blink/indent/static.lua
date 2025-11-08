@@ -7,7 +7,7 @@ M.draw = function(ns, indent_levels, bufnr, range)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
   local shiftwidth = utils.get_shiftwidth(bufnr)
-  local space = vim.opt.listchars:get().space
+  local space = vim.opt.listchars:get().space or ' '
   local symbol = config.static.char .. string.rep(space, shiftwidth - 1)
 
   -- add the new indents

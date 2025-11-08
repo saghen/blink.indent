@@ -12,10 +12,11 @@ vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
 --- @param bufnr number
 --- @param start_line number
 --- @param end_line number
+--- @param horizontal_offset number
 --- @return table<number, number> indent_levels
 --- @return { start_line: number, end_line: number } scope_range
 --- @return boolean is_cached
-function M.get_indent_levels(winnr, bufnr, start_line, end_line)
+function M.get_indent_levels(winnr, bufnr, start_line, end_line, horizontal_offset)
   local cache_entry = cache[bufnr]
   local cursor = vim.api.nvim_win_get_cursor(winnr)
   local shiftwidth = utils.get_shiftwidth(bufnr)
@@ -27,7 +28,7 @@ function M.get_indent_levels(winnr, bufnr, start_line, end_line)
     and cache_entry.end_line == end_line
     and cache_entry.cursor[1] == cursor[1]
   then
-    return cache_entry.indent_levels, cache_entry.scope_range, true
+    return cache_entry.indent_levels, cache_entry.scope_range, cache_entry.horizontal_offset == horizontal_offset
   end
   local indent_levels, scope_range = M._get_indent_levels(bufnr, start_line, end_line, shiftwidth, cursor[1])
   cache[bufnr] = {

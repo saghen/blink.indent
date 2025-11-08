@@ -42,7 +42,8 @@ M.draw = function(winnr, bufnr)
   end
 
   local range = utils.get_win_scroll_range(winnr, bufnr)
-  local indent_levels, scope_range, is_cached = parser.get_indent_levels(winnr, bufnr, range.start_line, range.end_line)
+  local indent_levels, scope_range, is_cached =
+    parser.get_indent_levels(winnr, bufnr, range.start_line, range.end_line, range.horizontal_offset)
 
   if config.static.enabled and not is_cached then
     require('blink.indent.static').draw(config.static.ns, indent_levels, bufnr, range)

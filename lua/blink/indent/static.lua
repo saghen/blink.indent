@@ -12,7 +12,7 @@ M.draw = function(ns, indent_levels, bufnr, range)
 
   local shiftwidth = utils.get_shiftwidth(bufnr)
   local space = vim.opt.listchars:get().space or ' '
-  local symbol = config.static.char .. string.rep(space, shiftwidth - 1)
+  local symbol = config.static.char .. space:rep(shiftwidth - 1)
 
   -- add the new indents
   local lines = vim.api.nvim_buf_get_lines(bufnr, range.start_line - 1, range.end_line, false)
@@ -29,7 +29,7 @@ M.draw = function(ns, indent_levels, bufnr, range)
 
     -- draw
     if indent_level > range.horizontal_offset then
-      local virt_text = string.rep(symbol, indent_level)
+      local virt_text = symbol:rep(indent_level)
 
       if range.horizontal_offset > 0 then
         local success, symbol_offset_index = pcall(vim.str_byteindex, symbol, 'utf-32', range.horizontal_offset)

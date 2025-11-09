@@ -115,7 +115,7 @@ end
 --- @return boolean is_all_whitespace
 function M.get_indent_level(line, shiftwidth)
   local whitespace_chars = line:match('^%s*')
-  local whitespace_char_count = string.len(string.gsub(whitespace_chars, '\t', string.rep(' ', shiftwidth)))
+  local whitespace_char_count = string.gsub(whitespace_chars, '\t', (' '):rep(shiftwidth)):len()
 
   return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
 end
@@ -129,7 +129,7 @@ function M.get_line_indent_level(bufnr, line_number, shiftwidth)
   local line = utils.get_line(bufnr, line_number)
 
   local whitespace_chars = line:match('^%s*')
-  local whitespace_char_count = string.len(string.gsub(whitespace_chars, '\t', string.rep(' ', shiftwidth)))
+  local whitespace_char_count = string.gsub(whitespace_chars, '\t', (' '):rep(shiftwidth)):len()
 
   return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
 end

@@ -67,7 +67,7 @@ function M._get_indent_levels(bufnr, start_line, end_line, shiftwidth, cursor_li
 
   local scope_indent_level = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
   local scope_next_line = utils.get_line(bufnr, cursor_line + 1)
-  local scope_next_indent_level = scope_next_line ~= nil and M.get_indent_level(scope_next_line, shiftwidth)
+  local scope_next_indent_level = scope_next_line ~= nil and M.get_line_indent_level(bufnr, cursor_line + 1, shiftwidth)
     or scope_indent_level
 
   -- start from the next line if its indent level its higher
@@ -109,17 +109,6 @@ function M._get_indent_levels(bufnr, start_line, end_line, shiftwidth, cursor_li
   return indent_levels, { start_line = scope_start_line, end_line = scope_end_line }
 end
 
---- @param line string
---- @param shiftwidth integer
---- @return integer indent_level
---- @return boolean is_all_whitespace
-function M.get_indent_level(line, shiftwidth)
-  local whitespace_chars = line:match('^%s*')
-  local whitespace_char_count = string.gsub(whitespace_chars, '\t', (' '):rep(shiftwidth)):len()
-
-  return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
-end
-
 --- @param bufnr integer
 --- @param line_number integer
 --- @param shiftwidth integer
@@ -129,7 +118,7 @@ function M.get_line_indent_level(bufnr, line_number, shiftwidth)
   local line = utils.get_line(bufnr, line_number)
 
   local whitespace_chars = line:match('^%s*')
-  local whitespace_char_count = string.gsub(whitespace_chars, '\t', (' '):rep(shiftwidth)):len()
+  local whitespace_char_count = whitespace_chars:gsub('\t', (' '):rep(shiftwidth)):len()
 
   return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
 end

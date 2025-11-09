@@ -24,7 +24,7 @@ M.draw = function(ns, indent_levels, bufnr, range)
     previous_indent_level = indent_level
 
     -- draw
-    if indent_level > 0 then
+    if indent_level > range.horizontal_offset then
       local virt_text = string.rep(symbol, indent_level)
 
       if range.horizontal_offset > 0 then

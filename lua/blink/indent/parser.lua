@@ -1,18 +1,18 @@
 --- @class blink.indent.CacheEntry
---- @field changedtick? integer
---- @field cursor? [integer, integer]
---- @field end_line? integer
---- @field horizontal_offset? integer
---- @field indent_levels? table<integer, integer>
---- @field scope_range? { start_line: integer, end_line: integer }
---- @field shiftwidth? integer
---- @field start_line? integer
+--- @field indent_levels table<integer, integer>
+--- @field shiftwidth integer
+--- @field changedtick integer
+--- @field scope_range { start_line: integer, end_line: integer }
+--- @field start_line integer
+--- @field end_line integer
+--- @field horizontal_offset integer
+--- @field cursor [integer, integer]
 
 local utils = require('blink.indent.utils')
 
 local M = {}
 
---- @type blink.indent.CacheEntry[]
+--- @type table<integer, blink.indent.CacheEntry>
 local cache = {}
 vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
   group = vim.api.nvim_create_augroup('blink.indent', { clear = false }),
@@ -49,6 +49,7 @@ function M.get_indent_levels(winnr, bufnr, start_line, end_line, horizontal_offs
     scope_range = scope_range,
     start_line = start_line,
     end_line = end_line,
+    horizontal_offset = horizontal_offset,
     cursor = cursor,
   }
   return indent_levels, scope_range, false

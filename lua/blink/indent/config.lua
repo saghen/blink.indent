@@ -70,9 +70,9 @@ local config = {
   },
 }
 
---- @param opts blink.indent.Config | nil
+--- @param opts? blink.indent.Config
 local function setup(opts) config = vim.tbl_deep_extend('force', config, opts or {}) end
 
---- @type blink.indent.ConfigStrict | { setup: fun(opts?: blink.indent.Config | nil) }
+--- @type blink.indent.ConfigStrict | { setup: fun(opts?: blink.indent.Config) }
 local M = setmetatable({}, { __index = function(_, k) return k == 'setup' and setup or config[k] end })
 return M

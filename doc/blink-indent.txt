@@ -1,0 +1,319 @@
+*blink-indent.txt*  Performant indent guides
+
+MIT License Copyright (c) 2025 Liam Dyer
+
+==============================================================================
+CONTENTS                                                  *blink-indent-contents*
+
+  1. Introduction .................... |blink-indent|
+  2. Installation .................... |blink-indent-installation|
+  3. Configuration ................... |blink-indent-config|
+  4. Enable .......................... |blink-indent-enable|
+  5. API ............................. |blink-indent-api|
+  6. Highlights ...................... |blink-indent-highlights|
+
+==============================================================================
+INTRODUCTION                                                    *blink-indent*
+
+blink.indent provides indent guides with scope on every keystroke (0.1-2ms
+per render), including on massive files, in ~500 LoC. These indent guides
+work in the vast majority of valid code and compute quicker (~10x) than via
+Treesitter.
+
+If you want something more feature rich, consider using indent-blankline
+instead: https://github.com/lukas-reineke/indent-blankline.nvim
+
+==============================================================================
+INSTALLATION                                        *blink-indent-installation*
+
+>lua
+  -- lazy.nvim
+  {
+    'saghen/blink.indent',
+    --- @module 'blink.indent'
+    --- @type blink.indent.Config
+    -- opts = {},
+  }
+
+  -- vim.pack
+  vim.pack.add({ 'saghen/blink.indent' })
+  -- require('blink.indent').setup({})
+<
+
+Note: Calling `setup()` is optional, as the plugin will automatically
+initialize with the default configuration.
+
+
+==============================================================================
+CONFIGURATION                                              *blink-indent-config*
+
+>lua
+  require('blink.indent').setup({
+    blocked = {
+      -- default: 'terminal', 'quickfix', 'nofile', 'prompt'
+      buftypes = { include_defaults = true },
+      -- default: 'lspinfo', 'packer', 'checkhealth',
+      -- 'help', 'man', 'gitcommit', 'dashboard', ''
+      filetypes = { include_defaults = true },
+    },
+    static = {
+      enabled = true,
+      char = '▎',
+      priority = 1,
+      -- specify multiple highlights here for rainbow-style indent guides
+      -- highlights = {
+      --   'BlinkIndentRed', 'BlinkIndentOrange', 'BlinkIndentYellow',
+      --   'BlinkIndentGreen', 'BlinkIndentViolet', 'BlinkIndentCyan'
+      -- },
+      highlights = { 'BlinkIndent' },
+    },
+    scope = {
+      enabled = true,
+      char = '▎',
+      priority = 1000,
+      -- set this to a single highlight, such as 'BlinkIndent' to disable
+      -- rainbow-style indent guides
+      -- highlights = { 'BlinkIndentScope' },
+      -- optionally add:
+      -- 'BlinkIndentRed', 'BlinkIndentCyan',
+      -- 'BlinkIndentYellow', 'BlinkIndentGreen'
+      highlights = {
+        'BlinkIndentOrange',
+        'BlinkIndentViolet',
+        'BlinkIndentBlue'
+      },
+      
+      -- Show underlines on the line above the current scope
+      underline = {
+        enabled = false,
+        -- optionally add:
+        -- 'BlinkIndentRedUnderline', 'BlinkIndentCyanUnderline',
+        -- 'BlinkIndentYellowUnderline', 'BlinkIndentGreenUnderline'
+        highlights = {
+          'BlinkIndentOrangeUnderline',
+          'BlinkIndentVioletUnderline',
+          'BlinkIndentBlueUnderline'
+        },
+      },
+    },
+  })
+<
+
+==============================================================================
+ENABLE                                                   *blink-indent-enable*
+
+                                                              *g:indent_guide*
+g:indent_guide
+    Type: `boolean`
+    Default: `true`
+
+    Global variable to enable or disable indent guides across all buffers.
+    Set to `false` to disable indent guides globally.
+
+
+>lua
+    vim.g.indent_guide = false
+<
+
+    To toggle with a keymap:
+>lua
+  local indent = require('blink.indent')
+  vim.keymap.set('n', '<leader>ti', function()
+    indent.enable(not indent.is_enabled())
+  end, { desc = 'Toggle indent guides' })
+<
+
+                                                              *b:indent_guide*
+b:indent_guide
+    Type: `boolean`
+    Default: `nil`
+
+    Buffer-local variable to enable or disable indent guides for a specific
+    buffer. When set, this takes precedence over |g:indent_guide|.
+>lua
+    vim.b[bufnr].indent_guide = false
+<
+    
+    To toggle with a keymap:
+>lua
+  local indent = require('blink.indent')
+  vim.keymap.set('n', '<leader>ti', function()
+    indent.enable(not indent.is_enabled({ bufnr = 0 }), { bufnr = 0 })
+  end, { desc = 'Toggle buffer indent guides' })
+<
+
+==============================================================================
+API                                                        *blink-indent-api*
+
+                                                        *blink.indent.setup()*
+setup({opts})
+    Configure the plugin.
+
+    Parameters: ~
+      • {opts} (`blink.indent.Config`) Configuration table (see
+        |blink-indent-config|)
+
+    Note: Calling this function is optional. The plugin will automatically
+    initialize with default configuration if not called.
+
+    Example: ~
+>lua
+    require('blink.indent').setup({
+      static = { enabled = true },
+      scope = { enabled = true },
+    })
+<
+
+                                                       *blink.indent.enable()*
+enable({enable}, {filter})
+    Enable or disable indent guides globally or per-buffer.
+
+    Parameters: ~
+      • {enable} (`boolean?`) Whether to enable guides (default: `true`)
+      • {filter} (`blink.indent.Filter?`) Optional filter table:
+          • bufnr (`number?`): Buffer number (0 for current buffer)
+
+    Examples: ~
+>lua
+    local indent = require('blink.indent')
+    
+    -- Toggle globally
+    indent.enable(not indent.is_enabled())
+    
+    -- Disable globally
+    indent.enable(false)
+    
+    -- Toggle for current buffer
+    indent.enable(
+      not indent.is_enabled({ bufnr = 0 }),
+      { bufnr = 0 }
+    )
+    
+    -- Enable for specific buffer
+    indent.enable(true, { bufnr = 5 })
+<
+
+                                                    *blink.indent.is_enabled()*
+is_enabled({filter})
+    Check if indent guides are enabled.
+
+    Parameters: ~
+      • {filter} (`blink.indent.Filter?`) Optional filter table:
+          • bufnr (`number?`): Buffer number (0 for current buffer)
+
+    Returns: ~
+      • (`boolean`) `true` if indent guides are enabled
+
+    The function checks in this order:
+      1. If {filter.bufnr} is provided, checks |b:indent_guide|
+      2. If buffer is not blocked by buftype/filetype rules
+      3. Finally checks |g:indent_guide|
+
+    Examples: ~
+>lua
+    local indent = require('blink.indent')
+    
+    -- Check global status
+    if indent.is_enabled() then
+      print('Indent guides are enabled')
+    end
+    
+    -- Check current buffer status
+    if indent.is_enabled({ bufnr = 0 }) then
+      print('Indent guides are enabled for this buffer')
+    end
+<
+
+==============================================================================
+HIGHLIGHTS                                            *blink-indent-highlights*
+
+All highlights defined for blink-indent begin with `BlinkIndent` followed by
+the type of highlight (e.g., color name for colored guides, or `Underline`
+for underline effects).
+
+By default, the base |hl-BlinkIndent| highlight is linked to |hl-Whitespace|,
+and |hl-BlinkIndentScope| is linked to |hl-Normal|. Colored highlights use
+predefined colors, and underline highlights use special underline colors.
+
+For example, to change the default indent guide color: >vim
+
+    highlight BlinkIndent guifg="#3b4261"
+<
+
+or via lua: >lua
+
+    vim.api.nvim_set_hl(0, 'BlinkIndent', { fg = '#3b4261' })
+<
+
+                                                        *hl-BlinkIndent*
+BlinkIndent
+    Used as the base highlight group for static indent guides.
+    Defaults to link to |hl-Whitespace|.
+
+                                                        *hl-BlinkIndentScope*
+BlinkIndentScope
+    Used as the base highlight group for scope indent guides.
+    Defaults to link to |hl-Normal|.
+
+                                                        *hl-BlinkIndentRed*
+BlinkIndentRed
+    Defaults to #cc241d. See |hl-BlinkIndent|.
+
+                                                        *hl-BlinkIndentOrange*
+BlinkIndentOrange
+    Defaults to #d65d0e. See |hl-BlinkIndent|.
+
+                                                        *hl-BlinkIndentYellow*
+BlinkIndentYellow
+    Defaults to #d79921. See |hl-BlinkIndent|.
+
+                                                        *hl-BlinkIndentGreen*
+BlinkIndentGreen
+    Defaults to #689d6a. See |hl-BlinkIndent|.
+
+                                                        *hl-BlinkIndentCyan*
+BlinkIndentCyan
+    Defaults to #a89984. See |hl-BlinkIndent|.
+
+                                                        *hl-BlinkIndentBlue*
+BlinkIndentBlue
+    Defaults to #458588. See |hl-BlinkIndent|.
+
+                                                        *hl-BlinkIndentViolet*
+BlinkIndentViolet
+    Defaults to #b16286. See |hl-BlinkIndent|.
+
+                                                        *hl-BlinkIndentUnderline*
+BlinkIndentUnderline
+    Used to underline the line above the current scope when `scope.underline.enable = true`. See |blink-indent-config|.
+
+                                                        *hl-BlinkIndentRedUnderline*
+BlinkIndentRedUnderline
+    Defaults to sp=#cc241d. See |hl-BlinkIndentUnderline|.
+
+                                                        *hl-BlinkIndentOrangeUnderline*
+BlinkIndentOrangeUnderline
+    Defaults to sp=#d65d0e. See |hl-BlinkIndentUnderline|.
+
+                                                        *hl-BlinkIndentYellowUnderline*
+BlinkIndentYellowUnderline
+    Defaults to sp=#d79921. See |hl-BlinkIndentUnderline|.
+
+                                                        *hl-BlinkIndentGreenUnderline*
+BlinkIndentGreenUnderline
+    Defaults to sp=#689d6a. See |hl-BlinkIndentUnderline|.
+
+                                                        *hl-BlinkIndentCyanUnderline*
+BlinkIndentCyanUnderline
+    Defaults to sp=#a89984. See |hl-BlinkIndentUnderline|.
+
+                                                        *hl-BlinkIndentBlueUnderline*
+BlinkIndentBlueUnderline
+    Defaults to sp=#458588. See |hl-BlinkIndentUnderline|.
+
+                                                        *hl-BlinkIndentVioletUnderline*
+BlinkIndentVioletUnderline
+    Defaults to sp=#b16286. See |hl-BlinkIndentUnderline|.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:

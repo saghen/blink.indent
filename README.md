@@ -21,6 +21,7 @@
 
 -- vim.pack
 vim.pack.add({ 'saghen/blink.indent' })
+-- require('blink.indent').setup({})
 ```
 
 ## Options

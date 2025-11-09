@@ -25,7 +25,7 @@ vim.pack.add({ 'saghen/blink.indent' })
 
 ## Options
 
-Note that calling `setup` is optional, as the plugin will automatically initialize with the default configuration.
+Note that calling `setup()` is optional, as the plugin will automatically initialize with the default configuration.
 
 Disable with `vim.g.indent_guide = false` (global) or `vim.b[bufnr].indent_guide = false` (per-buffer). Some filetypes and buftypes are disabled by default, see below. You may also create a keymap to toggle visibility like so:
 
@@ -59,7 +59,7 @@ require('blink.indent').setup({
     -- set this to a single highlight, such as 'BlinkIndent' to disable rainbow-style indent guides
     -- highlights = { 'BlinkIndentScope' },
     -- optionally add: 'BlinkIndentRed', 'BlinkIndentCyan', 'BlinkIndentYellow', 'BlinkIndentGreen'
-    highlights = { 'BlinkIndentOrange', 'BlinkIndentViolet', 'BlinkIndentBlue' }
+    highlights = { 'BlinkIndentOrange', 'BlinkIndentViolet', 'BlinkIndentBlue' },
     -- enable to show underlines on the line above the current scope
     underline = {
       enabled = false,

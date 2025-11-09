@@ -59,7 +59,7 @@ require('blink.indent').setup({
     -- set this to a single highlight, such as 'BlinkIndent' to disable rainbow-style indent guides
     -- highlights = { 'BlinkIndentScope' },
     -- optionally add: 'BlinkIndentRed', 'BlinkIndentCyan', 'BlinkIndentYellow', 'BlinkIndentGreen'
-    highlights = { 'BlinkIndentOrange', 'BlinkIndentViolet', 'BlinkIndentBlue' }
+    highlights = { 'BlinkIndentOrange', 'BlinkIndentViolet', 'BlinkIndentBlue' },
     -- enable to show underlines on the line above the current scope
     underline = {
       enabled = false,

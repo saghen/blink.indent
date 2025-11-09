@@ -6,7 +6,7 @@ local parser = require('blink.indent.parser')
 local utils = require('blink.indent.utils')
 
 --- @class blink.indent.Filter
---- @field bufnr? number
+--- @field bufnr? integer
 
 local M = {}
 
@@ -32,8 +32,8 @@ M.enable = function(enable, filter)
   vim.api.nvim__redraw({ valid = false })
 end
 
---- @param winnr number
---- @param bufnr number
+--- @param winnr integer
+--- @param bufnr integer
 M.draw = function(winnr, bufnr)
   if not M.is_enabled({ bufnr = bufnr }) then
     vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)

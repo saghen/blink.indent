@@ -3,6 +3,10 @@ local M = {}
 local config = require('blink.indent.config')
 local utils = require('blink.indent.utils')
 
+--- @param ns integer
+--- @param indent_levels table<integer, integer>
+--- @param bufnr integer
+--- @param range { start_line: integer, end_line: integer, horizontal_offset: integer }
 M.draw = function(ns, indent_levels, bufnr, range)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 

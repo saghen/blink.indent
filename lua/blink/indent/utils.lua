@@ -1,19 +1,26 @@
 local M = {}
 
+--- @param bufnr integer
 function M.get_shiftwidth(bufnr)
   local shiftwidth = vim.bo[bufnr].shiftwidth
   if shiftwidth == 0 then shiftwidth = vim.bo[bufnr].tabstop end
   return math.max(shiftwidth, 2)
 end
 
+--- @param bufnr integer
+--- @param line_idx integer
+--- @return string
 function M.get_line(bufnr, line_idx) return vim.api.nvim_buf_get_lines(bufnr, line_idx - 1, line_idx, false)[1] end
 
+--- @param idx number
+--- @param hl_groups string[]
+--- @return string
 function M.get_rainbow_hl(idx, hl_groups) return hl_groups[(math.floor(idx)) % #hl_groups + 1] end
 
 --- Get the top and bottom line of the viewport
---- @param winnr number
---- @param bufnr number
---- @return { bufnr: number, start_line: number, end_line: number, horizontal_offset: number }
+--- @param winnr integer
+--- @param bufnr integer
+--- @return { bufnr: integer, start_line: integer, end_line: integer, horizontal_offset: integer }
 M.get_win_scroll_range = function(winnr, bufnr)
   local line_count = vim.api.nvim_buf_line_count(bufnr)
 

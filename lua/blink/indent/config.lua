@@ -10,18 +10,18 @@
 
 --- @class blink.indent.StaticConfig
 --- @field enabled boolean
---- @field ns number Namespace of the extmarks used to draw the static guides
+--- @field ns integer Namespace of the extmarks used to draw the static guides
 --- @field char '┆' | '┊' | '╎' | '║' | '▏' | '▎' | string Character used to draw the scope guides
---- @field priority number
+--- @field priority integer
 --- @field highlights string[]
 
 --- @class (exact) blink.indent.StaticConfigPartial : blink.indent.StaticConfig, {}
 
 --- @class blink.indent.ScopeConfig
 --- @field enabled boolean Highlights highest leve of indentation on the current line
---- @field ns number Namespace of the extmarks used to draw the scope guides
+--- @field ns integer Namespace of the extmarks used to draw the scope guides
 --- @field char '┆' | '┊' | '╎' | '║' | '▏' | '▎' | string Character used to draw the scope guides
---- @field priority number Priority of the extmarks used to draw the scope guides
+--- @field priority integer Priority of the extmarks used to draw the scope guides
 --- @field highlights string[] Highlight groups used to draw the scope guides
 --- @field underline blink.indent.ScopeUnderlineConfig
 
@@ -70,9 +70,9 @@ local config = {
   },
 }
 
---- @param opts blink.indent.Config
+--- @param opts? blink.indent.Config
 local function setup(opts) config = vim.tbl_deep_extend('force', config, opts or {}) end
 
---- @type blink.indent.ConfigStrict
+--- @type blink.indent.ConfigStrict | { setup: fun(opts?: blink.indent.Config) }
 local M = setmetatable({}, { __index = function(_, k) return k == 'setup' and setup or config[k] end })
 return M

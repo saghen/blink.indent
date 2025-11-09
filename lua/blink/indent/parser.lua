@@ -1,20 +1,31 @@
+--- @class blink.indent.CacheEntry
+--- @field indent_levels table<integer, integer>
+--- @field shiftwidth integer
+--- @field changedtick integer
+--- @field scope_range { start_line: integer, end_line: integer }
+--- @field start_line integer
+--- @field end_line integer
+--- @field horizontal_offset integer
+--- @field cursor [integer, integer]
+
 local utils = require('blink.indent.utils')
 
 local M = {}
 
+--- @type table<integer, blink.indent.CacheEntry>
 local cache = {}
 vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
   group = vim.api.nvim_create_augroup('blink.indent', { clear = false }),
   callback = function(args) cache[args.buf] = nil end,
 })
 
---- @param winnr number
---- @param bufnr number
---- @param start_line number
---- @param end_line number
---- @param horizontal_offset number
---- @return table<number, number> indent_levels
---- @return { start_line: number, end_line: number } scope_range
+--- @param winnr integer
+--- @param bufnr integer
+--- @param start_line integer
+--- @param end_line integer
+--- @param horizontal_offset integer
+--- @return table<integer, integer> indent_levels
+--- @return { start_line: integer, end_line: integer } scope_range
 --- @return boolean is_cached
 function M.get_indent_levels(winnr, bufnr, start_line, end_line, horizontal_offset)
   local cache_entry = cache[bufnr]
@@ -38,18 +49,19 @@ function M.get_indent_levels(winnr, bufnr, start_line, end_line, horizontal_offs
     scope_range = scope_range,
     start_line = start_line,
     end_line = end_line,
+    horizontal_offset = horizontal_offset,
     cursor = cursor,
   }
   return indent_levels, scope_range, false
 end
 
---- @param bufnr number
---- @param start_line number
---- @param end_line number
---- @param shiftwidth number
---- @param cursor_line number
---- @return table<number, number> indent_levels
---- @return { start_line: number, end_line: number } scope_range
+--- @param bufnr integer
+--- @param start_line integer
+--- @param end_line integer
+--- @param shiftwidth integer
+--- @param cursor_line integer
+--- @return table<integer, integer> indent_levels
+--- @return { start_line: integer, end_line: integer } scope_range
 function M._get_indent_levels(bufnr, start_line, end_line, shiftwidth, cursor_line)
   local indent_levels = {}
 
@@ -98,8 +110,8 @@ function M._get_indent_levels(bufnr, start_line, end_line, shiftwidth, cursor_li
 end
 
 --- @param line string
---- @param shiftwidth number
---- @return number indent_level
+--- @param shiftwidth integer
+--- @return integer indent_level
 --- @return boolean is_all_whitespace
 function M.get_indent_level(line, shiftwidth)
   local whitespace_chars = line:match('^%s*')
@@ -108,10 +120,10 @@ function M.get_indent_level(line, shiftwidth)
   return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
 end
 
---- @param bufnr number
---- @param line_number number
---- @param shiftwidth number
---- @return number indent_level
+--- @param bufnr integer
+--- @param line_number integer
+--- @param shiftwidth integer
+--- @return integer indent_level
 --- @return boolean is_all_whitespace
 function M.get_line_indent_level(bufnr, line_number, shiftwidth)
   local line = utils.get_line(bufnr, line_number)

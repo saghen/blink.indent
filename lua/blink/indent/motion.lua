@@ -102,11 +102,8 @@ function M.register(no_override)
 
   local function map(mode, lhs, rhs, opts)
     if no_override and find_keymap(mode, lhs) then return end
-    if lhs == '' then
-      local mapping = find_keymap(mode, lhs)
-      if mapping.desc == opts.desc then vim.keymap.del(mode, lhs) end
-      return
-    end
+    -- TODO: clear default keymap
+    if lhs == '' then return end
 
     opts.silent = true
     vim.keymap.set(mode, lhs, rhs, opts)

@@ -18,9 +18,23 @@ M.draw = function(ns, indent_levels, is_all_whitespace, bufnr, range)
   -- add the new indents
   local previous_indent_level = indent_levels[range.start_line]
   for line_number = range.start_line, range.end_line do
-    local current_indent_level = indent_levels[line_number]
-    local indent_level = (is_all_whitespace[line_number] and previous_indent_level ~= nil) and previous_indent_level
-      or current_indent_level
+    local indent_level = indent_levels[line_number]
+    if is_all_whitespace[line_number] then
+      -- find next non-whitespace line
+      local next_line_number = line_number + 1
+      while is_all_whitespace[next_line_number] do
+        next_line_number = next_line_number + 1
+      end
+
+      -- use the next non-whitespace line's indent level if the indent level is higher
+      -- otherwise use last indent level
+      local next_indent_level = indent_levels[next_line_number]
+      if next_indent_level ~= nil and (previous_indent_level == nil or next_indent_level > previous_indent_level) then
+        indent_level = next_indent_level
+      else
+        indent_level = previous_indent_level
+      end
+    end
     previous_indent_level = indent_level
 
     -- draw

@@ -5,9 +5,10 @@ local utils = require('blink.indent.utils')
 
 --- @param ns integer
 --- @param indent_levels table<integer, integer>
+--- @param is_all_whitespace table<integer, boolean>
 --- @param bufnr integer
 --- @param range { start_line: integer, end_line: integer, horizontal_offset: integer }
-M.draw = function(ns, indent_levels, bufnr, range)
+M.draw = function(ns, indent_levels, is_all_whitespace, bufnr, range)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
   local shiftwidth = utils.get_shiftwidth(bufnr)
@@ -15,15 +16,10 @@ M.draw = function(ns, indent_levels, bufnr, range)
   local symbol = config.static.char .. space:rep(shiftwidth - 1)
 
   -- add the new indents
-  local lines = vim.api.nvim_buf_get_lines(bufnr, range.start_line - 1, range.end_line, false)
   local previous_indent_level = indent_levels[range.start_line]
   for line_number = range.start_line, range.end_line do
-    local line = lines[line_number - range.start_line + 1]
-    local whitespace_chars = line:match('^%s*')
-
-    local is_all_whitespace = #whitespace_chars == #line
     local current_indent_level = indent_levels[line_number]
-    local indent_level = (is_all_whitespace and previous_indent_level ~= nil) and previous_indent_level
+    local indent_level = (is_all_whitespace[line_number] and previous_indent_level ~= nil) and previous_indent_level
       or current_indent_level
     previous_indent_level = indent_level
 

@@ -52,11 +52,11 @@ M.draw = function(winnr, bufnr)
 
   local range = utils.get_win_scroll_range(winnr, bufnr)
   local parser = require('blink.indent.parser')
-  local indent_levels, scope_range, is_cached =
+  local indent_levels, is_all_whitespace, scope_range, is_cached =
     parser.get_indent_levels(winnr, bufnr, range.start_line, range.end_line, range.horizontal_offset)
 
   if config.static.enabled and not is_cached then
-    require('blink.indent.static').draw(config.static.ns, indent_levels, bufnr, range)
+    require('blink.indent.static').draw(config.static.ns, indent_levels, is_all_whitespace, bufnr, range)
   elseif not config.static.enabled then
     vim.api.nvim_buf_clear_namespace(range.bufnr, config.static.ns, 0, -1)
   end

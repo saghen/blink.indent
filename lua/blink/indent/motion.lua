@@ -44,7 +44,6 @@ function M.operator(side, add_to_jumplist)
 
     -- Make sequence of jumps
     for _ = 1, count do
-      vim.print(scope_range)
       move_cursor(scope_range, side)
 
       indent_level, scope_range = parser.get_scope()

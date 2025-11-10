@@ -62,6 +62,7 @@ local config = {
     filetypes = { include_defaults = true },
   },
   mappings = {
+    border = 'both',
     object_scope = 'ii',
     object_scope_with_border = 'ai',
     goto_top = '[i',

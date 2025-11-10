@@ -2,7 +2,6 @@
 -- Somewhat equivalent to indent-blankline but fast
 
 local config = require('blink.indent.config')
-local parser = require('blink.indent.parser')
 local utils = require('blink.indent.utils')
 
 --- @class blink.indent.Filter
@@ -13,7 +12,7 @@ local M = {}
 --- @param opts blink.indent.Config
 M.setup = function(opts)
   config.setup(opts)
-  vim.api.nvim__redraw({ valid = false })
+  M.draw_all()
 end
 
 --- Enables or disables visibility of indent guides
@@ -29,19 +28,30 @@ M.enable = function(enable, filter)
     vim.g.indent_guide = enable
   end
 
-  vim.api.nvim__redraw({ valid = false })
+  M.draw_all()
 end
 
+--- Draws indent guides for all visible windows
+M.draw_all = function()
+  for _, winid in ipairs(vim.api.nvim_list_wins()) do
+    local winnr = vim.api.nvim_win_get_number(winid)
+    local bufnr = vim.api.nvim_win_get_buf(winid)
+    M.draw(winnr, bufnr)
+  end
+end
+
+--- Draws indent guides for the given window
 --- @param winnr integer
 --- @param bufnr integer
 M.draw = function(winnr, bufnr)
-  if not M.is_enabled({ bufnr = bufnr }) then
+  if not M.is_enabled({ bufnr = bufnr }) or (not config.static.enabled and not config.scope.enabled) then
     vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)
     vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
     return
   end
 
   local range = utils.get_win_scroll_range(winnr, bufnr)
+  local parser = require('blink.indent.parser')
   local indent_levels, scope_range, is_cached =
     parser.get_indent_levels(winnr, bufnr, range.start_line, range.end_line, range.horizontal_offset)
 

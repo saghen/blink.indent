@@ -178,7 +178,10 @@ function M.get_line_indent_level(bufnr, line_number, shiftwidth)
   local line = utils.get_line(bufnr, line_number)
 
   local whitespace_chars = line:match('^%s*')
-  local whitespace_char_count = whitespace_chars:gsub('\t', (' '):rep(shiftwidth)):len()
+  --- @cast whitespace_chars string
+  local whitespace_char_count = whitespace_chars:find('\t') ~= nil
+      and whitespace_chars:gsub('\t', (' '):rep(shiftwidth)):len()
+    or whitespace_chars:len()
 
   return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
 end

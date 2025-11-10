@@ -16,7 +16,7 @@ CONTENTS                                                  *blink-indent-contents
 INTRODUCTION                                                    *blink-indent*
 
 blink.indent provides indent guides with scope on every keystroke (0.1-2ms
-per render), including on massive files, in ~500 LoC. These indent guides
+per render), including on massive files, in ~700 LoC. These indent guides
 work in the vast majority of valid code and compute quicker (~10x) than via
 Treesitter.
 
@@ -55,6 +55,17 @@ CONFIGURATION                                              *blink-indent-config*
       -- default: 'lspinfo', 'packer', 'checkhealth',
       -- 'help', 'man', 'gitcommit', 'dashboard', ''
       filetypes = { include_defaults = true },
+    },
+    mappings = {
+      -- which lines around the scope are included for 'ai': 'top', 'bottom', 'both', or 'none'
+      border = 'both',
+      -- set to '' to disable
+      -- textobjects (e.g. `y2ii` to yank current and outer scope)
+      object_scope = 'ii',
+      object_scope_with_border = 'ai',
+      -- motions
+      goto_top = '[i',
+      goto_bottom = ']i',
     },
     static = {
       enabled = true,

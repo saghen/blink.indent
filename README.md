@@ -2,7 +2,7 @@
   <h2 align="center">Blink Indent (blink.indent)</h2>
 </p>
 
-**blink.indent** provides indent guides with scope on every keystroke (0.1-2ms per render), including on massive files, in ~500 LoC. These indent guides work in the vast majority of valid code and compute quicker (~10x) than via Treesitter. If you want something more feature rich, consider using [indent-blankline](https://github.com/lukas-reineke/indent-blankline.nvim) instead.
+**blink.indent** provides indent guides with scope on every keystroke (0.1-2ms per render), including on massive files, in ~700 LoC. These indent guides work in the vast majority of valid code and compute quicker (~10x) than via Treesitter. If you want something more feature rich, consider using [indent-blankline](https://github.com/lukas-reineke/indent-blankline.nvim) instead.
 
 <img width="900" src="https://github.com/user-attachments/assets/275dbac8-0f2a-4703-ac01-58152afc2c92" alt="Screenshot" />
 
@@ -44,6 +44,17 @@ require('blink.indent').setup({
     buftypes = { include_defaults = true },
     -- default: 'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit', 'dashboard', ''
     filetypes = { include_defaults = true },
+  },
+  mappings = {
+    -- which lines around the scope are included for 'ai': 'top', 'bottom', 'both', or 'none'
+    border = 'both',
+    -- set to '' to disable
+    -- textobjects (e.g. `y2ii` to yank current and outer scope)
+    object_scope = 'ii',
+    object_scope_with_border = 'ai',
+    -- motions
+    goto_top = '[i',
+    goto_bottom = ']i',
   },
   static = {
     enabled = true,

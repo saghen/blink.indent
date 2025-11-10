@@ -2,6 +2,7 @@
 -- Somewhat equivalent to indent-blankline but fast
 
 local config = require('blink.indent.config')
+local motion = require('blink.indent.motion')
 local utils = require('blink.indent.utils')
 
 --- @class blink.indent.Filter
@@ -12,6 +13,7 @@ local M = {}
 --- @param opts blink.indent.Config
 M.setup = function(opts)
   config.setup(opts)
+  motion.register()
   M.draw_all()
 end
 

@@ -1,7 +1,6 @@
 local augroup = vim.api.nvim_create_augroup('blink.indent', {})
 
 --- highlights
-
 local function setup_hl()
   vim.api.nvim_set_hl(0, 'BlinkIndent', { default = true, link = 'Whitespace' })
   vim.api.nvim_set_hl(0, 'BlinkIndentScope', { default = true, link = 'Normal' })
@@ -27,7 +26,6 @@ setup_hl()
 vim.api.nvim_create_autocmd('ColorScheme', { group = augroup, callback = setup_hl })
 
 --- highlighter
-
 local ns = vim.api.nvim_create_namespace('blink.indent')
 local indent = require('blink.indent')
 vim.api.nvim_set_decoration_provider(ns, { on_win = function(_, winnr, bufnr) indent.draw(winnr, bufnr) end })
@@ -35,3 +33,6 @@ vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
   group = augroup,
   callback = function() indent.draw(vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()) end,
 })
+
+--- motions
+require('blink.indent.motion').register(true)

@@ -33,9 +33,8 @@ end
 
 --- Draws indent guides for all visible windows
 M.draw_all = function()
-  for _, winid in ipairs(vim.api.nvim_list_wins()) do
-    local winnr = vim.api.nvim_win_get_number(winid)
-    local bufnr = vim.api.nvim_win_get_buf(winid)
+  for _, winnr in ipairs(vim.api.nvim_list_wins()) do
+    local bufnr = vim.api.nvim_win_get_buf(winnr)
     M.draw(winnr, bufnr)
   end
 end

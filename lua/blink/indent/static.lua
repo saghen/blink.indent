@@ -28,13 +28,11 @@ M.draw = function(ns, indent_levels, bufnr, range)
     previous_indent_level = indent_level
 
     -- draw
-    if indent_level > range.horizontal_offset then
+    if indent_level * shiftwidth > range.horizontal_offset then
       local virt_text = symbol:rep(indent_level)
 
       if range.horizontal_offset > 0 then
-        local success, symbol_offset_index = pcall(vim.str_byteindex, symbol, 'utf-32', range.horizontal_offset)
-        -- TODO: drop goto
-        if not success then goto continue end
+        local symbol_offset_index = vim.str_byteindex(virt_text, 'utf-32', range.horizontal_offset)
         virt_text = virt_text:sub(symbol_offset_index + 1)
       end
 
@@ -46,8 +44,6 @@ M.draw = function(ns, indent_levels, bufnr, range)
         priority = config.static.priority,
       })
     end
-
-    ::continue::
   end
 end
 

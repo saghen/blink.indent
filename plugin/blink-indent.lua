@@ -35,7 +35,7 @@ vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
 })
 vim.api.nvim_create_autocmd('OptionSet', {
   group = augroup,
-  pattern = 'listchars',
+  pattern = { 'shiftwidth', 'listchars', 'tabstop' },
   callback = function() indent.draw_all(true) end,
 })
 

@@ -6,7 +6,6 @@ local motion = require('blink.indent.motion')
 local parser = require('blink.indent.parser')
 local static = require('blink.indent.static')
 local scope = require('blink.indent.scope')
-local utils = require('blink.indent.utils')
 
 --- @class blink.indent.Filter
 --- @field bufnr? integer
@@ -17,7 +16,7 @@ local M = {}
 M.setup = function(opts)
   config.setup(opts)
   motion.register()
-  M.draw_all()
+  M.draw_all(true)
 end
 
 --- Enables or disables visibility of indent guides
@@ -33,44 +32,7 @@ M.enable = function(enable, filter)
     vim.g.indent_guide = enable
   end
 
-  M.draw_all()
-end
-
---- Draws indent guides for all visible windows
---- @param force boolean? Ignores cache and always redraws
-M.draw_all = function(force)
-  for _, winnr in ipairs(vim.api.nvim_list_wins()) do
-    local bufnr = vim.api.nvim_win_get_buf(winnr)
-    M.draw(winnr, bufnr, force)
-  end
-end
-
---- Draws indent guides for the given window
---- @param winnr integer
---- @param bufnr integer
---- @param force boolean? Ignores cache and always redraws
-M.draw = function(winnr, bufnr, force)
-  if not M.is_enabled({ bufnr = bufnr }) or (not config.static.enabled and not config.scope.enabled) then
-    vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)
-    vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
-    return
-  end
-
-  local range = utils.get_win_scroll_range(winnr, bufnr)
-  local indent_levels, is_all_whitespace, scope_range, is_cached =
-    parser.get_indent_levels(winnr, bufnr, range.start_line, range.end_line, range.horizontal_offset)
-
-  if config.static.enabled and (not is_cached or force) then
-    static.draw(config.static.ns, indent_levels, is_all_whitespace, bufnr, range)
-  elseif not config.static.enabled then
-    vim.api.nvim_buf_clear_namespace(range.bufnr, config.static.ns, 0, -1)
-  end
-
-  if config.scope.enabled and (not is_cached or force) then
-    scope.draw(config.scope.ns, indent_levels, bufnr, scope_range, range)
-  elseif not config.scope.enabled then
-    vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
-  end
+  M.draw_all(true)
 end
 
 local default_blocked_filetypes = { 'lspinfo', 'packer', 'checkhealth', 'help', 'man', 'gitcommit', 'dashboard', '' }
@@ -95,6 +57,52 @@ M.is_enabled = function(filter)
   end
 
   return vim.g.indent_guide ~= false
+end
+
+--- Draws indent guides for all visible windows
+--- @param force boolean? Ignores cache and always redraws
+M.draw_all = function(force)
+  for _, winnr in ipairs(vim.api.nvim_list_wins()) do
+    local bufnr = vim.api.nvim_win_get_buf(winnr)
+    M.draw(winnr, bufnr, force)
+  end
+end
+
+--- Draws indent guides for the given window
+--- @param winnr integer
+--- @param bufnr integer
+--- @param force boolean? Ignores cache and always redraws
+M.draw = function(winnr, bufnr, force)
+  if force then
+    parser.cache[bufnr] = nil
+    scope.cache[bufnr] = nil
+    static.cache[bufnr] = nil
+  end
+
+  if not M.is_enabled({ bufnr = bufnr }) or (not config.static.enabled and not config.scope.enabled) then
+    vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)
+    vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
+    return
+  end
+
+  -- parse
+  local range = parser.get_parse_range(winnr, bufnr)
+  local indent_levels, is_cached = parser.get_indent_levels(bufnr, range)
+
+  -- static
+  if config.static.enabled and not is_cached then
+    static.draw(bufnr, config.static.ns, indent_levels, range)
+  elseif not config.static.enabled then
+    vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)
+  end
+
+  -- scope
+  if config.scope.enabled then
+    local scope_range = parser.get_scope_partial(bufnr, winnr, indent_levels, range)
+    scope.draw(bufnr, config.scope.ns, indent_levels, scope_range, range)
+  elseif not config.scope.enabled then
+    vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
+  end
 end
 
 return M

@@ -88,8 +88,8 @@ function M.textobject(opts)
   end
 end
 
---- @param no_override? boolean Will not override existing keymaps
-function M.register(no_override)
+--- @param default? boolean Will not override existing keymaps
+function M.register(default)
   local maps = require('blink.indent.config').mappings
 
   local function find_keymap(mode, lhs)
@@ -100,7 +100,7 @@ function M.register(no_override)
   end
 
   local function map(mode, lhs, rhs, opts)
-    if no_override and find_keymap(mode, lhs) then return end
+    if default and find_keymap(mode, lhs) then return end
     -- TODO: clear default keymap
     if lhs == '' then return end
 

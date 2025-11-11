@@ -33,6 +33,11 @@ vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
   group = augroup,
   callback = function() indent.draw(vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()) end,
 })
+vim.api.nvim_create_autocmd('OptionSet', {
+  group = augroup,
+  pattern = 'listchars',
+  callback = function() indent.draw_all(true) end,
+})
 
 --- motions
 require('blink.indent.motion').register(true)

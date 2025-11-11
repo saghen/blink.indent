@@ -3,6 +3,9 @@
 
 local config = require('blink.indent.config')
 local motion = require('blink.indent.motion')
+local parser = require('blink.indent.parser')
+local static = require('blink.indent.static')
+local scope = require('blink.indent.scope')
 local utils = require('blink.indent.utils')
 
 --- @class blink.indent.Filter
@@ -34,17 +37,19 @@ M.enable = function(enable, filter)
 end
 
 --- Draws indent guides for all visible windows
-M.draw_all = function()
+--- @param force boolean? Ignores cache and always redraws
+M.draw_all = function(force)
   for _, winnr in ipairs(vim.api.nvim_list_wins()) do
     local bufnr = vim.api.nvim_win_get_buf(winnr)
-    M.draw(winnr, bufnr)
+    M.draw(winnr, bufnr, force)
   end
 end
 
 --- Draws indent guides for the given window
 --- @param winnr integer
 --- @param bufnr integer
-M.draw = function(winnr, bufnr)
+--- @param force boolean? Ignores cache and always redraws
+M.draw = function(winnr, bufnr, force)
   if not M.is_enabled({ bufnr = bufnr }) or (not config.static.enabled and not config.scope.enabled) then
     vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)
     vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
@@ -52,18 +57,17 @@ M.draw = function(winnr, bufnr)
   end
 
   local range = utils.get_win_scroll_range(winnr, bufnr)
-  local parser = require('blink.indent.parser')
   local indent_levels, is_all_whitespace, scope_range, is_cached =
     parser.get_indent_levels(winnr, bufnr, range.start_line, range.end_line, range.horizontal_offset)
 
-  if config.static.enabled and not is_cached then
-    require('blink.indent.static').draw(config.static.ns, indent_levels, is_all_whitespace, bufnr, range)
+  if config.static.enabled and (not is_cached or force) then
+    static.draw(config.static.ns, indent_levels, is_all_whitespace, bufnr, range)
   elseif not config.static.enabled then
     vim.api.nvim_buf_clear_namespace(range.bufnr, config.static.ns, 0, -1)
   end
 
-  if config.scope.enabled and not is_cached then
-    require('blink.indent.scope').draw(config.scope.ns, indent_levels, bufnr, scope_range, range)
+  if config.scope.enabled and (not is_cached or force) then
+    scope.draw(config.scope.ns, indent_levels, bufnr, scope_range, range)
   elseif not config.scope.enabled then
     vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
   end

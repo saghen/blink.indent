@@ -1,6 +1,9 @@
 -- Based on mini.indentscope's implementation. License: MIT
 -- https://github.com/nvim-mini/mini.nvim/blob/79654ef28182986dcdd9e2d3506d1728fc7c4f79/lua/mini/indentscope.lua
 
+local config = require('blink.indent.config')
+local parser = require('blink.indent.parser')
+
 local M = {}
 
 --- @param scope_range blink.indent.ScopeRange
@@ -32,11 +35,10 @@ end
 --- @param add_to_jumplist? boolean Whether to add movement to jump list.
 function M.operator(side, add_to_jumplist)
   assert(vim.tbl_contains({ 'top', 'bottom' }, side), 'Invalid side: ' .. side)
-  local parser = require('blink.indent.parser')
 
   return function()
-    local indent_level, scope_range = parser.get_scope()
-    if indent_level == 0 then return end
+    local scope = parser.get_scope()
+    if scope.indent_level == 0 then return end
 
     -- needs remembering `count1` before adding to jump list because it seems to reset it to 1
     local count = vim.v.count1
@@ -44,10 +46,10 @@ function M.operator(side, add_to_jumplist)
 
     -- Make sequence of jumps
     for _ = 1, count do
-      move_cursor(scope_range, side)
+      move_cursor(scope, side)
 
-      indent_level, scope_range = parser.get_scope()
-      if indent_level == 0 then return end
+      scope = parser.get_scope()
+      if scope.indent_level == 0 then return end
     end
   end
 end
@@ -58,11 +60,10 @@ end
 --- @param opts? { border?: "top" | "bottom" | "both" | "none" }
 function M.textobject(opts)
   opts = opts or {}
-  local parser = require('blink.indent.parser')
 
   return function()
-    local indent_level, scope_range = parser.get_scope()
-    if indent_level == 0 then return end
+    local scope = parser.get_scope()
+    if scope.indent_level == 0 then return end
 
     -- Make sequence of incremental selections
     local count = vim.v.count1
@@ -77,20 +78,20 @@ function M.textobject(opts)
       end
 
       exit_visual_mode()
-      move_cursor(scope_range, start, border)
+      move_cursor(scope, start, border)
       vim.cmd('normal! V')
-      move_cursor(scope_range, finish, border)
+      move_cursor(scope, finish, border)
 
       -- Use `try_as_border = false` to enable chaining
-      indent_level, scope_range = parser.get_scope()
-      if indent_level == 0 then return end
+      scope = parser.get_scope()
+      if scope.indent_level == 0 then return end
     end
   end
 end
 
 --- @param default? boolean Will not override existing keymaps
 function M.register(default)
-  local maps = require('blink.indent.config').mappings
+  local maps = config.mappings
 
   local function find_keymap(mode, lhs)
     local mappings = vim.api.nvim_get_keymap(mode)

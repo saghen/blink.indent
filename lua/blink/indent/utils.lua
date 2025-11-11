@@ -17,19 +17,14 @@ function M.get_line(bufnr, line_idx) return vim.api.nvim_buf_get_lines(bufnr, li
 --- @return string
 function M.get_rainbow_hl(idx, hl_groups) return hl_groups[(math.floor(idx)) % #hl_groups + 1] end
 
---- Get the top and bottom line of the viewport
---- @param winnr integer
---- @param bufnr integer
---- @return { bufnr: integer, start_line: integer, end_line: integer, horizontal_offset: integer }
-M.get_win_scroll_range = function(winnr, bufnr)
-  local line_count = vim.api.nvim_buf_line_count(bufnr)
-
-  return {
-    bufnr = bufnr,
-    start_line = math.max(1, vim.fn.line('w0', winnr) - 1),
-    end_line = math.min(line_count, vim.fn.line('w$', winnr) + 1),
-    horizontal_offset = vim.api.nvim_win_call(winnr, function() return vim.fn.winsaveview().leftcol end),
-  }
+function M.make_buffer_cache()
+  local augroup = vim.api.nvim_create_augroup('blink.indent', { clear = false })
+  local cache = {}
+  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout', 'TextChanged', 'TextChangedI' }, {
+    group = augroup,
+    callback = function(args) cache[args.buf] = nil end,
+  })
+  return cache
 end
 
 return M

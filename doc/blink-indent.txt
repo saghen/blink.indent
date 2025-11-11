@@ -15,7 +15,7 @@ CONTENTS                                                  *blink-indent-contents
 ==============================================================================
 INTRODUCTION                                                    *blink-indent*
 
-blink.indent provides indent guides with scope on every keystroke (0.1-2ms
+blink.indent provides indent guides with scope on every keystroke (0.1-1ms
 per render), including on massive files, in ~700 LoC. These indent guides
 work in the vast majority of valid code and compute quicker (~10x) than via
 Treesitter.

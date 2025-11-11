@@ -3,65 +3,53 @@ local M = {}
 local config = require('blink.indent.config')
 local utils = require('blink.indent.utils')
 
+M.cache = utils.make_buffer_cache()
+
+--- @param bufnr integer
 --- @param ns integer
 --- @param indent_levels table<integer, integer>
---- @param bufnr integer
---- @param scope_range { start_line: integer, end_line: integer }
---- @param range { start_line: integer, end_line: integer, horizontal_offset: integer }
-M.draw = function(ns, indent_levels, bufnr, scope_range, range)
+--- @param scope_range blink.indent.ScopeRange
+--- @param range blink.indent.ParseRange
+function M.draw(bufnr, ns, indent_levels, scope_range, range)
+  local cache_entry = M.cache[bufnr]
+  if
+    cache_entry ~= nil
+    and cache_entry.start_line == scope_range.start_line
+    and cache_entry.end_line == scope_range.end_line
+    and cache_entry.indent_level == scope_range.indent_level
+    and range.horizontal_offset == cache_entry.horizontal_offset
+  then
+    return
+  end
+  M.cache[bufnr] = {
+    start_line = scope_range.start_line,
+    end_line = scope_range.end_line,
+    indent_level = scope_range.indent_level,
+    horizontal_offset = range.horizontal_offset,
+  }
+
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
-  local previous_indent_level = indent_levels[math.max(1, scope_range.start_line - 1)]
-  local indent_level = indent_levels[scope_range.start_line]
-
-  -- nothing to do
+  local indent_level = scope_range.indent_level
   if indent_level == 0 then return end
 
-  local shiftwidth = utils.get_shiftwidth(bufnr)
+  local win_col = (indent_level - 1) * utils.get_shiftwidth(bufnr) - range.horizontal_offset
+  if win_col < 0 then return end
+
   local symbol = config.scope.char
+  local hl_group = utils.get_rainbow_hl(indent_level - 1, config.scope.highlights)
 
-  local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
-  local starting_from_next_line = cursor_line + 1 == scope_range.start_line
-
-  -- HACK: we always use one indent level higher than the current one
-  -- but on the first line, we have no higher line to look at, so we
-  -- subtract one from the indent level
-  if scope_range.start_line == 1 and not starting_from_next_line then
-    indent_level = math.max(indent_level - 1, 0)
-  -- highlight the line above the first line if it has a lower indent level
-  -- and we didn't start from that line
-  elseif scope_range.start_line > 1 and not starting_from_next_line then
-    -- underline highlighting
-    if previous_indent_level < indent_level and config.scope.underline.enabled then
-      local line = vim.api.nvim_buf_get_lines(bufnr, scope_range.start_line - 2, scope_range.start_line - 1, false)[1]
-      local whitespace_chars = line:match('^%s*')
-      vim.hl.range(
-        bufnr,
-        ns,
-        utils.get_rainbow_hl(previous_indent_level, config.scope.underline.highlights),
-        { scope_range.start_line - 2, #whitespace_chars },
-        { scope_range.start_line - 2, -1 }
-      )
-    end
-
-    indent_level = previous_indent_level
-  elseif starting_from_next_line then
-    indent_level = previous_indent_level
-  end
-
-  if range.horizontal_offset > shiftwidth * indent_level then return end
-
-  -- apply the highlight
-  local hl_group = utils.get_rainbow_hl(indent_level, config.scope.highlights)
-  for i = math.max(range.start_line, scope_range.start_line), math.min(range.end_line, scope_range.end_line) do
+  for i = scope_range.start_line, scope_range.end_line do
     vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
       virt_text = { { symbol, hl_group } },
       virt_text_pos = 'overlay',
-      virt_text_win_col = indent_level * shiftwidth - range.horizontal_offset,
+      virt_text_win_col = win_col,
       hl_mode = 'combine',
       priority = config.scope.priority,
     })
   end
+
+  if config.scope.underline.enabled then M.draw_underline(bufnr, ns, indent_levels, scope_range) end
 end
 
 return M

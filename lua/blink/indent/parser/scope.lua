@@ -76,20 +76,17 @@ function M.get_scope_start(bufnr, cursor_line, shiftwidth)
   end
 
   local line_count = vim.api.nvim_buf_line_count(bufnr)
-  local scope_next_indent_level, next_is_all_whitespace =
-    line_count < cursor_line and M.get_line_indent_level(bufnr, cursor_line + 1, shiftwidth) or -1, false
-  while cursor_line < line_count and next_is_all_whitespace do
-    cursor_line = cursor_line + 1
-    scope_next_indent_level, next_is_all_whitespace = M.get_line_indent_level(bufnr, cursor_line + 1, shiftwidth)
+  if cursor_line == line_count then return cursor_line, scope_indent_level end
+
+  local next_line = cursor_line + 1
+  local scope_next_indent_level, next_is_all_whitespace = M.get_line_indent_level(bufnr, next_line, shiftwidth)
+  while next_is_all_whitespace and next_line < line_count do
+    next_line = next_line + 1
+    scope_next_indent_level, next_is_all_whitespace = M.get_line_indent_level(bufnr, next_line, shiftwidth)
   end
 
   -- start from the next line if its indent level its higher
-  local starting_from_next_line = scope_next_indent_level > scope_indent_level
-  if starting_from_next_line then
-    cursor_line = cursor_line + 1
-    scope_indent_level = scope_next_indent_level
-  end
-
+  if scope_next_indent_level > scope_indent_level then return cursor_line + 1, scope_next_indent_level end
   return cursor_line, scope_indent_level
 end
 

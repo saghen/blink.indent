@@ -264,7 +264,7 @@ BlinkIndent
                                                         *hl-BlinkIndentScope*
 BlinkIndentScope
     Used as the base highlight group for scope indent guides.
-    Defaults to link to |hl-Normal|.
+    Defaults to link to |hl-Delimiter|.
 
                                                         *hl-BlinkIndentRed*
 BlinkIndentRed

@@ -3,7 +3,7 @@ local augroup = vim.api.nvim_create_augroup('blink.indent', {})
 --- highlights
 local function setup_hl()
   vim.api.nvim_set_hl(0, 'BlinkIndent', { default = true, link = 'Whitespace' })
-  vim.api.nvim_set_hl(0, 'BlinkIndentScope', { default = true, link = 'Normal' })
+  vim.api.nvim_set_hl(0, 'BlinkIndentScope', { default = true, link = 'Delimiter' })
 
   vim.api.nvim_set_hl(0, 'BlinkIndentRed', { default = true, fg = '#cc241d', ctermfg = 'Red' })
   vim.api.nvim_set_hl(0, 'BlinkIndentOrange', { default = true, fg = '#d65d0e', ctermfg = 'Brown' })

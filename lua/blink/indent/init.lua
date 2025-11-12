@@ -61,7 +61,7 @@ M.is_enabled = function(filter)
 end
 
 --- Draws indent guides for all visible windows
---- @param force boolean? Ignores cache and always redraws
+--- @param force boolean? Ignore cache and always redraw
 M.draw_all = function(force)
   for _, winnr in ipairs(vim.api.nvim_list_wins()) do
     local bufnr = vim.api.nvim_win_get_buf(winnr)
@@ -74,7 +74,7 @@ local changedticks = utils.make_buffer_cache()
 --- Draws indent guides for the given window
 --- @param winnr integer
 --- @param bufnr integer
---- @param force boolean? Ignores cache and always redraws
+--- @param force boolean? Ignore cache and always redraw
 M.draw = function(winnr, bufnr, force)
   if force or changedticks[bufnr] ~= vim.b[bufnr].changedtick then
     parser.cache[bufnr] = nil

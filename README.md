@@ -20,7 +20,7 @@
 }
 
 -- vim.pack
-vim.pack.add({ 'saghen/blink.indent' })
+vim.pack.add({ 'https://github.com/saghen/blink.indent' })
 -- require('blink.indent').setup({})
 ```
 

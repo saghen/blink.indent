@@ -1,6 +1,6 @@
 ## [1.0.0] - 2025-11-06
 
-### !!! Breaking Changes !!!
+### Breaking Changes
 
 - partial config, `blink_indent` ns, vim.g.indent_guide for disable/enable ([4ea3573](https://github.com/saghen/blink.indent/commit/4ea3573ca492f0cf51e2a974b511fb0751d2f99d))
 - automatic initialization, drop `opts.blocked` ([ad2ea82](https://github.com/saghen/blink.indent/commit/ad2ea822b3fc6c6c2f0078d357e65a90535b4c55))

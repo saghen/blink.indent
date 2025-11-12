@@ -55,7 +55,7 @@ body = """
 
 [git]
 commit_parsers = [
-  { message = "^\\w+!:", group = "<!-- 0 -->!!! Breaking Changes !!!" },
+  { message = "^\\w+!:", group = "<!-- 0 -->Breaking Changes" },
   { message = "^feat", group = "<!-- 1 -->Features" },
   { message = "^fix", group = "<!-- 2 -->Bug Fixes" },
   { message = "^refactor", group = "<!-- 3 -->Refactor" },

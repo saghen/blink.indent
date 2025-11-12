@@ -59,6 +59,7 @@ require('blink.indent').setup({
   static = {
     enabled = true,
     char = '▎',
+    whitespace_char = nil, -- inherits from `vim.opt.listchars:get().space` when `nil` (see `:h listchars`)
     priority = 1,
     -- specify multiple highlights here for rainbow-style indent guides
     -- highlights = { 'BlinkIndentRed', 'BlinkIndentOrange', 'BlinkIndentYellow', 'BlinkIndentGreen', 'BlinkIndentViolet', 'BlinkIndentCyan' },

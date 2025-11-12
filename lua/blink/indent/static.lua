@@ -22,7 +22,7 @@ function M.draw(bufnr, ns, indent_levels, range)
   local cache_entry = M.cache[bufnr]
 
   local shiftwidth = utils.get_shiftwidth(bufnr)
-  local space = vim.opt.listchars:get().space or ' '
+  local space = config.static.whitespace_char or vim.opt.listchars:get().space or ' '
   local symbol = config.static.char .. space:rep(shiftwidth - 1)
 
   -- cache the virt text to avoid unnecessary string.rep calls

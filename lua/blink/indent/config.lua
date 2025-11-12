@@ -21,6 +21,7 @@
 --- @field enabled boolean
 --- @field ns integer Namespace of the extmarks used to draw the static guides
 --- @field char '┆' | '┊' | '╎' | '║' | '▏' | '▎' | string Character used to draw the scope guides
+--- @field whitespace_char '·' | '␣' | string | nil Character used to draw the whitespace guides. When `nil` (default), uses the value of `vim.opt.listchars:get().space` (see `:h listchars`)
 --- @field priority integer
 --- @field highlights string[]
 
@@ -72,6 +73,7 @@ local config = {
     enabled = true,
     ns = vim.api.nvim_create_namespace('blink.indent.static'),
     char = '▎',
+    whitespace_char = nil,
     priority = 1,
     highlights = { 'BlinkIndent' },
   },

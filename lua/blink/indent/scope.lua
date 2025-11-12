@@ -52,4 +52,20 @@ function M.draw(bufnr, ns, indent_levels, scope_range, range)
   if config.scope.underline.enabled then M.draw_underline(bufnr, ns, indent_levels, scope_range) end
 end
 
+function M.draw_underline(bufnr, ns, indent_levels, scope_range)
+  local indent_level = scope_range.indent_level
+  local previous_line_indent_level = indent_levels[scope_range.start_line - 1]
+
+  if previous_line_indent_level == nil or previous_line_indent_level >= indent_level then return end
+  local line = vim.api.nvim_buf_get_lines(bufnr, scope_range.start_line - 2, scope_range.start_line - 1, false)[1]
+  local whitespace_chars = line:match('^%s*')
+  vim.hl.range(
+    bufnr,
+    ns,
+    utils.get_rainbow_hl(previous_line_indent_level, config.scope.underline.highlights),
+    { scope_range.start_line - 2, #whitespace_chars },
+    { scope_range.start_line - 2, -1 }
+  )
+end
+
 return M

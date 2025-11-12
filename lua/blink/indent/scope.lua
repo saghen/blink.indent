@@ -5,12 +5,13 @@ local utils = require('blink.indent.utils')
 
 M.cache = utils.make_buffer_cache()
 
+--- @param winnr integer
 --- @param bufnr integer
 --- @param ns integer
 --- @param indent_levels table<integer, integer>
 --- @param scope_range blink.indent.ScopeRange
 --- @param range blink.indent.ParseRange
-function M.draw(bufnr, ns, indent_levels, scope_range, range)
+function M.draw(winnr, bufnr, ns, indent_levels, scope_range, range)
   local cache_entry = M.cache[bufnr]
   if
     cache_entry ~= nil
@@ -36,6 +37,7 @@ function M.draw(bufnr, ns, indent_levels, scope_range, range)
   local win_col = (indent_level - 1) * utils.get_shiftwidth(bufnr) - range.horizontal_offset
   if win_col < 0 then return end
 
+  local breakindent = utils.get_breakindent(winnr)
   local symbol = config.scope.char
   local hl_group = utils.get_rainbow_hl(indent_level - 1, config.scope.highlights)
 
@@ -44,6 +46,7 @@ function M.draw(bufnr, ns, indent_levels, scope_range, range)
       virt_text = { { symbol, hl_group } },
       virt_text_pos = 'overlay',
       virt_text_win_col = win_col,
+      virt_text_repeat_linebreak = breakindent,
       hl_mode = 'combine',
       priority = config.scope.priority,
     })

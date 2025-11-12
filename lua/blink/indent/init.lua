@@ -95,7 +95,7 @@ M.draw = function(winnr, bufnr, force)
 
   -- static
   if config.static.enabled and not is_cached then
-    static.draw(bufnr, config.static.ns, indent_levels, range)
+    static.draw(winnr, bufnr, config.static.ns, indent_levels, range)
   elseif not config.static.enabled then
     vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)
   end
@@ -103,7 +103,7 @@ M.draw = function(winnr, bufnr, force)
   -- scope
   if config.scope.enabled then
     local scope_range = parser.get_scope_partial(bufnr, winnr, indent_levels, range)
-    scope.draw(bufnr, config.scope.ns, indent_levels, scope_range, range)
+    scope.draw(winnr, bufnr, config.scope.ns, indent_levels, scope_range, range)
   elseif not config.scope.enabled then
     vim.api.nvim_buf_clear_namespace(bufnr, config.scope.ns, 0, -1)
   end

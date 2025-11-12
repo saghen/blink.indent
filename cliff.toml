@@ -7,8 +7,7 @@ body = """
 {% if get_env(name="CI", default="false") != "true" -%}
 {% if version -%}
     {% if previous.version -%}
-        ## [{{ version | trim_start_matches(pat="v") }}]
-          ({{ self::remote_url() }}/compare/{{ previous.version }}..{{ version }}) - {{ timestamp | date(format="%Y-%m-%d") }}
+        ## [{{ version | trim_start_matches(pat="v") }}]({{ self::remote_url() }}/compare/{{ previous.version }}..{{ version }}) - {{ timestamp | date(format="%Y-%m-%d") }}
     {% else -%}
         ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
     {% endif %}
@@ -51,6 +50,7 @@ body = """
     {%- endif %}
 {%- endfor %}
 {% endif %}
+
 """
 
 [git]

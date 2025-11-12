@@ -20,7 +20,7 @@ function M.get_rainbow_hl(idx, hl_groups) return hl_groups[(math.floor(idx)) % #
 function M.make_buffer_cache()
   local augroup = vim.api.nvim_create_augroup('blink.indent', { clear = false })
   local cache = {}
-  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout', 'TextChanged', 'TextChangedI' }, {
+  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
     group = augroup,
     callback = function(args) cache[args.buf] = nil end,
   })

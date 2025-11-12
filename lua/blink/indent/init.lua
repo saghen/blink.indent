@@ -6,6 +6,7 @@ local motion = require('blink.indent.motion')
 local parser = require('blink.indent.parser')
 local static = require('blink.indent.static')
 local scope = require('blink.indent.scope')
+local utils = require('blink.indent.utils')
 
 --- @class blink.indent.Filter
 --- @field bufnr? integer
@@ -68,16 +69,19 @@ M.draw_all = function(force)
   end
 end
 
+local changedticks = utils.make_buffer_cache()
+
 --- Draws indent guides for the given window
 --- @param winnr integer
 --- @param bufnr integer
 --- @param force boolean? Ignores cache and always redraws
 M.draw = function(winnr, bufnr, force)
-  if force then
+  if force or changedticks[bufnr] ~= vim.b[bufnr].changedtick then
     parser.cache[bufnr] = nil
     scope.cache[bufnr] = nil
     static.cache[bufnr] = nil
   end
+  changedticks[bufnr] = vim.b[bufnr].changedtick
 
   if not M.is_enabled({ bufnr = bufnr }) or (not config.static.enabled and not config.scope.enabled) then
     vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)

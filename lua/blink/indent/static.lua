@@ -6,11 +6,12 @@ local utils = require('blink.indent.utils')
 --- @type table<integer, { indent_levels: table<integer, integer>, extmark_ids: table<integer, integer>, changedtick: integer }>
 M.cache = utils.make_buffer_cache()
 
+--- @param winnr integer
 --- @param bufnr integer
 --- @param ns integer
 --- @param indent_levels table<integer, integer>
 --- @param range { start_line: integer, end_line: integer, horizontal_offset: integer }
-function M.draw(bufnr, ns, indent_levels, range)
+function M.draw(winnr, bufnr, ns, indent_levels, range)
   -- cache the indent levels to avoid unnecessary extmark draws
   if not M.cache[bufnr] then
     vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
@@ -21,6 +22,7 @@ function M.draw(bufnr, ns, indent_levels, range)
   end
   local cache_entry = M.cache[bufnr]
 
+  local breakindent = utils.get_breakindent(winnr)
   local shiftwidth = utils.get_shiftwidth(bufnr)
   local space = config.static.whitespace_char or vim.opt.listchars:get().space or ' '
   local symbol = config.static.char .. space:rep(shiftwidth - 1)
@@ -48,6 +50,7 @@ function M.draw(bufnr, ns, indent_levels, range)
         id = cache_entry.extmark_ids[line_number],
         virt_text = { { virt_text, hl_group } },
         virt_text_pos = 'overlay',
+        virt_text_repeat_linebreak = breakindent,
         hl_mode = 'combine',
         priority = config.static.priority,
       })

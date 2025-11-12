@@ -1,10 +1,19 @@
 local M = {}
 
 --- @param bufnr integer
+--- @return integer
 function M.get_shiftwidth(bufnr)
   local shiftwidth = vim.bo[bufnr].shiftwidth
   if shiftwidth == 0 then shiftwidth = vim.bo[bufnr].tabstop end
   return math.max(shiftwidth, 2)
+end
+
+--- @param winnr integer
+--- @return boolean
+function M.get_breakindent(winnr)
+  local breakindent = vim.wo[winnr].breakindent
+  if breakindent == nil then breakindent = vim.o.breakindent end
+  return breakindent
 end
 
 --- @param bufnr integer

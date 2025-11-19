@@ -3,7 +3,7 @@ local M = {}
 local config = require('blink.indent.config')
 local utils = require('blink.indent.utils')
 
---- @type table<integer, { indent_levels: table<integer, integer>, extmark_ids: table<integer, integer>, changedtick: integer }>
+--- @type table<integer, { indent_levels: table<integer, integer>, extmark_ids: table<integer, integer>, horizontal_offset: integer }>
 M.cache = utils.make_buffer_cache()
 
 --- @param winnr integer
@@ -13,9 +13,9 @@ M.cache = utils.make_buffer_cache()
 --- @param range { start_line: integer, end_line: integer, horizontal_offset: integer }
 function M.draw(winnr, bufnr, ns, indent_levels, range)
   -- cache the indent levels to avoid unnecessary extmark draws
-  if not M.cache[bufnr] then
+  if not M.cache[bufnr] or M.cache[bufnr].horizontal_offset ~= range.horizontal_offset then
     vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-    M.cache[bufnr] = { indent_levels = {}, extmark_ids = {} }
+    M.cache[bufnr] = { indent_levels = {}, extmark_ids = {}, horizontal_offset = range.horizontal_offset }
   else
     vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, range.start_line - 1)
     vim.api.nvim_buf_clear_namespace(bufnr, ns, range.end_line, -1)

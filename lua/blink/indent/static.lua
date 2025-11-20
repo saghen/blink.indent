@@ -44,7 +44,7 @@ function M.draw(winnr, bufnr, ns, indent_levels, whitespace_lens, range)
 
       -- indent isn't filled with whitespace, only use the space character for actual whitespace
       local whitespace_len = whitespace_lens[line_number]
-      if space ~= ' ' and whitespace_len ~= indent_level * shiftwidth then
+      if space ~= ' ' and whitespace_len < indent_level * shiftwidth then
         if whitespace_len == 0 then
           virt_text = symbol_plain:rep(indent_level)
         elseif whitespace_len % shiftwidth == 0 then

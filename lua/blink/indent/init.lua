@@ -91,11 +91,11 @@ M.draw = function(winnr, bufnr, force)
 
   -- parse
   local range = parser.get_parse_range(winnr, bufnr)
-  local indent_levels, is_cached = parser.get_indent_levels(bufnr, range)
+  local indent_levels, whitespace_lens, is_cached = parser.get_indent_levels(bufnr, range)
 
   -- static
   if config.static.enabled and not is_cached then
-    static.draw(winnr, bufnr, config.static.ns, indent_levels, range)
+    static.draw(winnr, bufnr, config.static.ns, indent_levels, whitespace_lens, range)
   elseif not config.static.enabled then
     vim.api.nvim_buf_clear_namespace(bufnr, config.static.ns, 0, -1)
   end

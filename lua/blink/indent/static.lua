@@ -10,8 +10,9 @@ M.cache = utils.make_buffer_cache()
 --- @param bufnr integer
 --- @param ns integer
 --- @param indent_levels table<integer, integer>
+--- @param whitespace_lens table<integer, integer>
 --- @param range { start_line: integer, end_line: integer, horizontal_offset: integer }
-function M.draw(winnr, bufnr, ns, indent_levels, range)
+function M.draw(winnr, bufnr, ns, indent_levels, whitespace_lens, range)
   -- cache the indent levels to avoid unnecessary extmark draws
   if not M.cache[bufnr] or M.cache[bufnr].horizontal_offset ~= range.horizontal_offset then
     vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
@@ -26,6 +27,7 @@ function M.draw(winnr, bufnr, ns, indent_levels, range)
   local shiftwidth = utils.get_shiftwidth(bufnr)
   local space = config.static.whitespace_char or vim.opt.listchars:get().space or ' '
   local symbol = config.static.char .. space:rep(shiftwidth - 1)
+  local symbol_plain = config.static.char .. (' '):rep(shiftwidth - 1)
 
   -- cache the virt text to avoid unnecessary string.rep calls
   local virt_text_cache = {}
@@ -39,6 +41,23 @@ function M.draw(winnr, bufnr, ns, indent_levels, range)
     then
       local virt_text = virt_text_cache[indent_level] or symbol:rep(indent_level)
       if virt_text_cache[indent_level] == nil then virt_text_cache[indent_level] = virt_text end
+
+      -- indent isn't filled with whitespace, only use the space character for actual whitespace
+      local whitespace_len = whitespace_lens[line_number]
+      if space ~= ' ' and whitespace_len ~= indent_level * shiftwidth then
+        if whitespace_len == 0 then
+          virt_text = symbol_plain:rep(indent_level)
+        elseif whitespace_len % shiftwidth == 0 then
+          virt_text = symbol:rep(whitespace_len / shiftwidth)
+            .. symbol_plain:rep(indent_level - whitespace_len / shiftwidth)
+        else
+          virt_text = symbol:rep(math.floor(whitespace_len / shiftwidth))
+            .. config.static.char
+            .. space:rep(whitespace_len % shiftwidth - 1)
+            .. (' '):rep(shiftwidth - whitespace_len % shiftwidth)
+            .. symbol_plain:rep(indent_level - math.floor(whitespace_len / shiftwidth) - 1)
+        end
+      end
 
       if range.horizontal_offset > 0 then
         local symbol_offset_index = vim.str_byteindex(virt_text, 'utf-32', range.horizontal_offset)

@@ -16,6 +16,7 @@ local M = {}
 function M.get_scope_partial(bufnr, winnr, indent_levels, range)
   local cursor_line = vim.api.nvim_win_get_cursor(winnr)[1]
   local scope_search_start_line, scope_indent_level = M.get_scope_start(bufnr, cursor_line, utils.get_shiftwidth(bufnr))
+  scope_search_start_line = math.min(math.max(scope_search_start_line, range.start_line), range.end_line)
 
   -- move up and down to find the scope
   local scope_start_line = scope_search_start_line

@@ -66,7 +66,8 @@ require('blink.indent').setup({
     highlights = { 'BlinkIndent' },
   },
   scope = {
-    enabled = true,
+    enabled = true, -- highlight highest level of indentation on the current line
+    indent_at_cursor = false, -- clamp to indent level of cursor
     char = '▎',
     priority = 1000,
     -- set this to a single highlight, such as 'BlinkIndent' to disable rainbow-style indent guides

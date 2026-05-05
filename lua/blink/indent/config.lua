@@ -28,7 +28,8 @@
 --- @class (exact) blink.indent.StaticConfigPartial : blink.indent.StaticConfig, {}
 
 --- @class blink.indent.ScopeConfig
---- @field enabled boolean Highlights highest leve of indentation on the current line
+--- @field enabled boolean Highlights highest level of indentation on the current line
+--- @field indent_at_cursor boolean Clamp to indent level of cursor
 --- @field ns integer Namespace of the extmarks used to draw the scope guides
 --- @field char '┆' | '┊' | '╎' | '║' | '▏' | '▎' | string Character used to draw the scope guides
 --- @field priority integer Priority of the extmarks used to draw the scope guides
@@ -79,6 +80,7 @@ local config = {
   },
   scope = {
     enabled = true,
+    indent_at_cursor = false,
     ns = vim.api.nvim_create_namespace('blink.indent.scope'),
     char = '▎',
     priority = 1000,

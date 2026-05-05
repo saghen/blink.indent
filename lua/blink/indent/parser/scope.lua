@@ -4,6 +4,7 @@
 --- @field end_line integer
 
 local utils = require('blink.indent.utils')
+local config = require('blink.indent.config')
 
 local M = {}
 
@@ -84,10 +85,19 @@ end
 --- @return integer cursor_line
 --- @return integer scope_indent_level
 function M.get_scope_start(bufnr, cursor_line, range, shiftwidth)
+  -- search upward for the first non all-whitespace line
   local scope_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
   while is_all_whitespace and cursor_line > range.start_line do
     cursor_line = cursor_line - 1
     scope_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
+  end
+
+  -- clamp indent level to cursor
+  if config.scope.indent_at_cursor then
+    local cursor_indent_level, covers_all_whitespace = M.get_cursor_indent_level(bufnr, cursor_line, shiftwidth)
+    if cursor_indent_level <= scope_indent_level and not covers_all_whitespace then
+      return cursor_line, math.ceil(cursor_indent_level)
+    end
   end
 
   if cursor_line == range.end_line then return cursor_line, scope_indent_level end
@@ -102,6 +112,26 @@ function M.get_scope_start(bufnr, cursor_line, range, shiftwidth)
   -- start from the next line if its indent level its higher
   if scope_next_indent_level > scope_indent_level then return cursor_line + 1, scope_next_indent_level end
   return cursor_line, scope_indent_level
+end
+
+--- @param bufnr integer
+--- @param shiftwidth integer
+--- @return integer indent_level Indent level at the cursor, rounded up
+--- @return boolean covers_all_whitespace Whether the cursor is on or past the first non-whitespace character
+function M.get_cursor_indent_level(bufnr, cursor_line, shiftwidth)
+  local cursor_col = vim.api.nvim_win_get_cursor(0)[2] + 1
+  local line = utils.get_line(bufnr, cursor_line)
+
+  local whitespace_chars = line:match('^%s*')
+  local covers_all_whitespace = #whitespace_chars <= cursor_col - 1
+
+  whitespace_chars = whitespace_chars:sub(1, cursor_col)
+  local whitespace_char_count = whitespace_chars:find('\t') ~= nil
+      and whitespace_chars:gsub('\t', (' '):rep(shiftwidth)):len()
+    or whitespace_chars:len()
+
+  local indent_level = math.ceil(whitespace_char_count / shiftwidth)
+  return math.ceil(indent_level), covers_all_whitespace
 end
 
 --- @param bufnr integer

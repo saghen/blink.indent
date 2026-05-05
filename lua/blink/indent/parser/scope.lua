@@ -115,6 +115,7 @@ function M.get_scope_start(bufnr, cursor_line, range, shiftwidth)
 end
 
 --- @param bufnr integer
+--- @param cursor_line integer
 --- @param shiftwidth integer
 --- @return integer indent_level Indent level at the cursor, rounded up
 --- @return boolean covers_all_whitespace Whether the cursor is on or past the first non-whitespace character

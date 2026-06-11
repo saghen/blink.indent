@@ -17,7 +17,7 @@ local M = {}
 function M.get_scope_partial(bufnr, winnr, indent_levels, range)
   local cursor_line = M.get_cursor_line_in_range(winnr, range)
   local scope_search_start_line, scope_indent_level =
-    M.get_scope_start(bufnr, cursor_line, range, utils.get_shiftwidth(bufnr))
+    M.get_scope_start(bufnr, winnr, cursor_line, range, utils.get_shiftwidth(bufnr))
 
   -- move up and down to find the scope
   local scope_start_line = scope_search_start_line
@@ -46,7 +46,7 @@ function M.get_scope(bufnr, winnr)
   local cursor_line = vim.api.nvim_win_get_cursor(winnr)[1]
   local line_count = vim.api.nvim_buf_line_count(bufnr)
   local start_line, scope_indent_level =
-    M.get_scope_start(bufnr, cursor_line, { start_line = 1, end_line = line_count, horizontal_offset = 0 }, shiftwidth)
+    M.get_scope_start(bufnr, winnr, cursor_line, { start_line = 1, end_line = line_count, horizontal_offset = 0 }, shiftwidth)
 
   -- move up and down to find the scope
   local scope_start_line = start_line
@@ -79,12 +79,13 @@ function M.get_cursor_line_in_range(winnr, range)
 end
 
 --- @param bufnr integer
+--- @param winnr integer
 --- @param cursor_line integer
 --- @param range blink.indent.ParseRange
 --- @param shiftwidth integer
 --- @return integer cursor_line
 --- @return integer scope_indent_level
-function M.get_scope_start(bufnr, cursor_line, range, shiftwidth)
+function M.get_scope_start(bufnr, winnr, cursor_line, range, shiftwidth)
   -- search upward for the first non all-whitespace line
   local scope_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
   while is_all_whitespace and cursor_line > range.start_line do
@@ -94,7 +95,7 @@ function M.get_scope_start(bufnr, cursor_line, range, shiftwidth)
 
   -- clamp indent level to cursor
   if config.scope.indent_at_cursor then
-    local cursor_indent_level, covers_all_whitespace = M.get_cursor_indent_level(bufnr, cursor_line, shiftwidth)
+    local cursor_indent_level, covers_all_whitespace = M.get_cursor_indent_level(bufnr, winnr, cursor_line, shiftwidth)
     if cursor_indent_level <= scope_indent_level and not covers_all_whitespace then
       return cursor_line, math.ceil(cursor_indent_level)
     end
@@ -115,12 +116,13 @@ function M.get_scope_start(bufnr, cursor_line, range, shiftwidth)
 end
 
 --- @param bufnr integer
+--- @param winnr integer
 --- @param cursor_line integer
 --- @param shiftwidth integer
 --- @return integer indent_level Indent level at the cursor, rounded up
 --- @return boolean covers_all_whitespace Whether the cursor is on or past the first non-whitespace character
-function M.get_cursor_indent_level(bufnr, cursor_line, shiftwidth)
-  local cursor_col = vim.api.nvim_win_get_cursor(0)[2] + 1
+function M.get_cursor_indent_level(bufnr, winnr, cursor_line, shiftwidth)
+  local cursor_col = vim.api.nvim_win_get_cursor(winnr)[2] + 1
   local line = utils.get_line(bufnr, cursor_line)
 
   local whitespace_chars = line:match('^%s*')

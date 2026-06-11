@@ -17,6 +17,8 @@ jobs:
 
       - name: Generate changelog
         uses: orhun/git-cliff-action@v4
+        with:
+          args: --latest --strip header
 
       - name: Release
         uses: softprops/action-gh-release@v2

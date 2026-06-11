@@ -4,16 +4,10 @@ repo = "blink.indent"
 
 [changelog]
 body = """
-{% if get_env(name="CI", default="false") != "true" -%}
-{% if version -%}
-    {% if previous.version -%}
-        ## [{{ version | trim_start_matches(pat="v") }}]({{ self::remote_url() }}/compare/{{ previous.version }}..{{ version }}) - {{ timestamp | date(format="%Y-%m-%d") }}
-    {% else -%}
-        ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
-    {% endif %}
+{% if previous.version -%}
+    ## [{{ version | trim_start_matches(pat="v") }}]({{ self::remote_url() }}/compare/{{ previous.version }}..{{ version }}) - {{ timestamp | date(format="%Y-%m-%d") }}
 {% else -%}
-    ## [unreleased]
-{% endif -%}
+    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
 {% endif %}
 
 {%- macro remote_url() -%}
@@ -26,29 +20,29 @@ body = """
         ([{{ commit.id | truncate(length=7, end="") }}]({{ self::remote_url() }}/commit/{{ commit.id }}))\
 {%- endmacro -%}
 
-{%- for group, commits in commits | group_by(attribute="group") -%}
+{% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | striptags | trim | upper_first }}
     {% for commit in commits
     | filter(attribute="scope")
     | sort(attribute="scope") %}
         {{ self::print_commit(commit=commit) }}
-    {% endfor %}
+    {%- endfor %}
     {% for commit in commits %}
         {%- if not commit.scope -%}
             {{ self::print_commit(commit=commit) }}
         {% endif -%}
     {% endfor %}
-{% endfor %}
-{%- if github -%}
-{% if github.contributors | filter(attribute="is_first_time", value=true) | length != 0 -%}
+{%- endfor -%}
+{% if github %}\
+{% if github.contributors | filter(attribute="is_first_time", value=true) | length != 0 %}
   ## New Contributors ❤︎
+  {% for contributor in github.contributors | filter(attribute="is_first_time", value=true) %}
+    - @{{ contributor.username }} made their first contribution
+      {%- if contributor.pr_number %} in \
+        [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}) \
+      {%- endif %}
+  {%- endfor %}
 {% endif %}\
-{% for contributor in github.contributors | filter(attribute="is_first_time", value=true) %}
-  - @{{ contributor.username }} made their first contribution
-    {%- if contributor.pr_number %} in \
-      [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}) \
-    {%- endif %}
-{%- endfor %}
 {% endif %}
 
 """
@@ -63,7 +57,5 @@ commit_parsers = [
   { message = "^perf", group = "<!-- 5 -->Performance" },
   { message = "^test", group = "<!-- 6 -->Testing" },
   { message = "^revert", group = "<!-- 7 -->Revert" },
-  { message = "^style", skip = true },
-  { message = "^refactor\\(clippy\\)", skip = true },
-  { message = "^chore|^ci", skip = true },
+  { message = "^.+:", skip = true }
 ]

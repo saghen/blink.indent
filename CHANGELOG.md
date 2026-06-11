@@ -1,3 +1,17 @@
+## [2.2.0](https://github.com/saghen/blink.indent/compare/v2.1.2..v2.2.0) - 2026-06-11
+
+### Features
+
+- `scope.indent_at_cursor` option (#51) ([15b3b25](https://github.com/saghen/blink.indent/commit/15b3b25c2e76025733cc96df0144e9a9ef4d495c))
+
+### Bug Fixes
+
+- `indent_at_cursor` option will update other windows' indent (#53) ([6639af3](https://github.com/saghen/blink.indent/commit/6639af3af4446a0fb8300c0180b445cd0be6872e))
+
+## New Contributors ❤︎
+
+- @Kaiser-Yang made their first contribution in [#53](https://github.com/saghen/blink.indent/pull/53)
+
 ## [2.1.2](https://github.com/saghen/blink.indent/compare/v2.1.1..v2.1.2) - 2026-01-13
 
 ### Bug Fixes

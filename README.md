@@ -39,6 +39,9 @@ or toggle on a per-buffer basis with `indent.enable(not indent.is_enabled({ bufn
 
 ```lua
 require('blink.indent').setup({
+  -- filetypes where scopes are closed by dedenting, such as python and yaml
+  -- set to true to treat all filetypes this way
+  dedent_scoped_filetypes = { include_defaults = true },
   blocked = {
     -- default: 'terminal', 'quickfix', 'nofile', 'prompt'
     buftypes = { include_defaults = true },

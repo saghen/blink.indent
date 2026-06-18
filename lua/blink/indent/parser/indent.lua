@@ -10,12 +10,37 @@
 --- @field end_line integer
 --- @field horizontal_offset integer
 
+local config = require('blink.indent.config')
 local utils = require('blink.indent.utils')
 
 local M = {}
 
+-- stylua: ignore
+local default_dedent_scoped_filetypes = {
+  automake = true, bzl = true, cabal = true, cabalconfig = true, cabalproject = true, chaskell = true, clean = true,
+  earthfile = true, elm = true, fsharp = true, gdscript = true, haml = true, haskell = true, haskellpersistent = true,
+  idris2 = true, just = true, kivy = true, lean = true, lhaskell = true, lidris2 = true, make = true,
+  moonscript = true, nim = true, ninja = true, pug = true, purescript = true, pyrex = true, python = true,
+  raml = true, roc = true, sage = true, salt = true, sass = true, snakemake = true, starlark = true, stylus = true,
+  yaml = true
+}
+
 --- @type table<integer, blink.indent.CacheEntry>
 M.cache = utils.make_buffer_cache()
+
+--- @param bufnr integer
+--- @return boolean
+function M.is_dedent_scoped(bufnr)
+  local filetype = vim.bo[bufnr].filetype
+  local filetypes = config.dedent_scoped_filetypes
+  if filetypes == true then return true end
+
+  --- @cast filetypes blink.indent.FiletypeListWithDefaults
+  if filetypes[filetype] ~= nil then return filetypes[filetype] == true end
+
+  return (filetypes.include_defaults ~= false and default_dedent_scoped_filetypes[filetype] == true)
+    or vim.tbl_contains(filetypes, filetype)
+end
 
 --- @param bufnr integer
 --- @param range blink.indent.ParseRange
@@ -31,7 +56,8 @@ function M.get_indent_levels(bufnr, range)
       cache_entry.horizontal_offset == range.horizontal_offset
   end
 
-  local indent_levels, whitespace_lens = M._get_indent_levels(bufnr, range, shiftwidth)
+  local dedent_scoped = M.is_dedent_scoped(bufnr)
+  local indent_levels, whitespace_lens = M._get_indent_levels(bufnr, range, shiftwidth, dedent_scoped)
   M.cache[bufnr] = {
     indent_levels = indent_levels,
     whitespace_lens = whitespace_lens,
@@ -47,9 +73,10 @@ end
 --- @param bufnr integer
 --- @param range blink.indent.ParseRange
 --- @param shiftwidth integer
+--- @param dedent_scoped boolean
 --- @return table<integer, integer> indent_levels
 --- @return table<integer, integer> whitespace_lens
-function M._get_indent_levels(bufnr, range, shiftwidth)
+function M._get_indent_levels(bufnr, range, shiftwidth, dedent_scoped)
   local indent_levels = {}
   local whitespace_lens = {}
 
@@ -65,8 +92,9 @@ function M._get_indent_levels(bufnr, range, shiftwidth)
     if is_all_whitespace then
       whitespace_lines_before = whitespace_lines_before + 1
     else
+      local whitespace_indent_level = dedent_scoped and indent_level or math.max(indent_level, prev_indent_level)
       for whitespace_line = line - whitespace_lines_before, line - 1 do
-        indent_levels[whitespace_line] = math.max(indent_level, prev_indent_level)
+        indent_levels[whitespace_line] = whitespace_indent_level
       end
       whitespace_lines_before = 0
       prev_indent_level = indent_level

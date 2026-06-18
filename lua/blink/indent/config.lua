@@ -6,6 +6,11 @@
 --- @field include_defaults boolean
 --- @field [number] string
 
+--- @class blink.indent.FiletypeListWithDefaults : blink.indent.ListWithDefaults
+--- @field [string] boolean? Set filetype keys to true/false to add/remove individual filetypes
+
+--- @alias blink.indent.DedentScopedFiletypes true | blink.indent.FiletypeListWithDefaults
+
 --- @class (exact) blink.indent.BlockedConfigPartial : blink.indent.BlockedConfig, {}
 
 --- @class blink.indent.MappingsConfig
@@ -46,12 +51,14 @@
 --- @class (exact) blink.indent.ScopeUnderlineConfigPartial : blink.indent.ScopeUnderlineConfig, {}
 
 --- @class blink.indent.ConfigStrict
+--- @field dedent_scoped_filetypes blink.indent.DedentScopedFiletypes defaults: filetypes where dedents close scopes
 --- @field blocked blink.indent.BlockedConfig
 --- @field mappings blink.indent.MappingsConfig
 --- @field static blink.indent.StaticConfig
 --- @field scope blink.indent.ScopeConfig
 
 --- @class (exact) blink.indent.Config : blink.indent.ConfigStrict, {}
+--- @field dedent_scoped_filetypes blink.indent.DedentScopedFiletypes
 --- @field blocked blink.indent.BlockedConfigPartial
 --- @field mappings blink.indent.MappingsConfigPartial
 --- @field static blink.indent.StaticConfigPartial
@@ -59,6 +66,7 @@
 
 --- @type blink.indent.ConfigStrict
 local config = {
+  dedent_scoped_filetypes = { include_defaults = true },
   blocked = {
     buftypes = { include_defaults = true },
     filetypes = { include_defaults = true },

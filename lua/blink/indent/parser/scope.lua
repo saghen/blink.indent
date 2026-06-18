@@ -5,6 +5,7 @@
 
 local utils = require('blink.indent.utils')
 local config = require('blink.indent.config')
+local indent = require('blink.indent.parser.indent')
 
 local M = {}
 
@@ -45,20 +46,27 @@ function M.get_scope(bufnr, winnr)
   local shiftwidth = utils.get_shiftwidth(bufnr)
   local cursor_line = vim.api.nvim_win_get_cursor(winnr)[1]
   local line_count = vim.api.nvim_buf_line_count(bufnr)
-  local start_line, scope_indent_level =
-    M.get_scope_start(bufnr, winnr, cursor_line, { start_line = 1, end_line = line_count, horizontal_offset = 0 }, shiftwidth)
+  local dedent_scoped = indent.is_dedent_scoped(bufnr)
+  local start_line, scope_indent_level = M.get_scope_start(
+    bufnr,
+    winnr,
+    cursor_line,
+    { start_line = 1, end_line = line_count, horizontal_offset = 0 },
+    shiftwidth
+  )
 
   -- move up and down to find the scope
   local scope_start_line = start_line
   while scope_start_line > 1 do
-    local prev_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, scope_start_line - 1, shiftwidth)
+    local prev_indent_level, is_all_whitespace =
+      M.get_effective_line_indent_level(bufnr, scope_start_line - 1, line_count, shiftwidth, dedent_scoped)
     if not is_all_whitespace and scope_indent_level > prev_indent_level then break end
     scope_start_line = scope_start_line - 1
   end
   local scope_end_line = start_line
   while scope_end_line < line_count do
-    local next_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, scope_end_line + 1, shiftwidth)
-
+    local next_indent_level, is_all_whitespace =
+      M.get_effective_line_indent_level(bufnr, scope_end_line + 1, line_count, shiftwidth, dedent_scoped)
     if not is_all_whitespace and scope_indent_level > next_indent_level then break end
     scope_end_line = scope_end_line + 1
   end
@@ -152,6 +160,25 @@ function M.get_line_indent_level(bufnr, line_number, shiftwidth)
     or whitespace_chars:len()
 
   return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
+end
+
+--- @param bufnr integer
+--- @param line_number integer
+--- @param line_count integer
+--- @param shiftwidth integer
+--- @param dedent_scoped boolean
+--- @return integer indent_level
+--- @return boolean is_all_whitespace
+function M.get_effective_line_indent_level(bufnr, line_number, line_count, shiftwidth, dedent_scoped)
+  local indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, line_number, shiftwidth)
+  if not is_all_whitespace or not dedent_scoped then return indent_level, is_all_whitespace end
+
+  while line_number < line_count do
+    line_number = line_number + 1
+    local indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, line_number, shiftwidth)
+    if not is_all_whitespace then return indent_level, false end
+  end
+  return 0, false
 end
 
 return M

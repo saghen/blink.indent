@@ -39,7 +39,7 @@ function M.is_dedent_scoped(bufnr)
   if filetypes[filetype] ~= nil then return filetypes[filetype] == true end
 
   return (filetypes.include_defaults ~= false and default_dedent_scoped_filetypes[filetype] == true)
-    or vim.tbl_contains(filetypes, filetype)
+    or (#filetypes > 0 and vim.tbl_contains(filetypes, filetype))
 end
 
 --- @param bufnr integer

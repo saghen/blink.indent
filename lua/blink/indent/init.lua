@@ -77,6 +77,9 @@ local changedticks = utils.make_buffer_cache()
 --- @param force boolean? Ignore cache and always redraw
 M.draw = function(winnr, bufnr, force)
   if not vim.api.nvim_buf_is_loaded(bufnr) then return end
+  if bufnr ~= 0 and bufnr ~= vim.api.nvim_get_current_buf() then
+    return vim.api.nvim_buf_call(bufnr, function() M.draw(winnr, bufnr, force) end)
+  end
 
   if force or changedticks[bufnr] ~= vim.b[bufnr].changedtick then
     parser.cache[bufnr] = nil

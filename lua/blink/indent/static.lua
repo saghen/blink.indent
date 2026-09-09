@@ -7,6 +7,13 @@ local utils = require('blink.indent.utils')
 M.cache = utils.make_buffer_cache()
 
 local function get_virt_text(whitespace, width, shiftwidth, space, tabchars)
+  local whitespace_width = not whitespace:find('\t', 1, true) and #whitespace
+    or not tabchars and not whitespace:find('[^ \t]') and vim.fn.strdisplaywidth(whitespace)
+  if whitespace_width and (whitespace_width == 0 or whitespace_width >= width) then
+    local fill = whitespace_width == 0 and ' ' or space
+    return (config.static.char .. fill:rep(shiftwidth - 1)):rep(width / shiftwidth)
+  end
+
   local chars = {}
   for char in whitespace:gmatch('.') do
     local column = #chars

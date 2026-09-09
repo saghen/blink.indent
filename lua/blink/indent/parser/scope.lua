@@ -96,6 +96,7 @@ end
 function M.get_scope_start(bufnr, winnr, cursor_line, range, shiftwidth)
   -- search upward for the first non all-whitespace line
   local scope_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
+  local cursor_is_whitespace = is_all_whitespace
   while is_all_whitespace and cursor_line > range.start_line do
     cursor_line = cursor_line - 1
     scope_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
@@ -109,17 +110,21 @@ function M.get_scope_start(bufnr, winnr, cursor_line, range, shiftwidth)
     end
   end
 
-  if cursor_line == range.end_line then return cursor_line, scope_indent_level end
+  -- start from next or previous line line if indent level is higher
+  for _, step in ipairs({ 1, -1 }) do
+    -- ignore previous line if the current line is all whitespace
+    if step == -1 and (cursor_is_whitespace or indent.is_dedent_scoped(bufnr)) then break end
 
-  local next_line = cursor_line + 1
-  local scope_next_indent_level, next_is_all_whitespace = M.get_line_indent_level(bufnr, next_line, shiftwidth)
-  while next_is_all_whitespace and next_line < range.end_line do
-    next_line = next_line + 1
-    scope_next_indent_level, next_is_all_whitespace = M.get_line_indent_level(bufnr, next_line, shiftwidth)
+    local last_line = step == 1 and range.end_line or range.start_line
+    for line = cursor_line + step, last_line, step do
+      local level, is_whitespace = M.get_line_indent_level(bufnr, line, shiftwidth)
+      if not is_whitespace then
+        if level > scope_indent_level then return cursor_line + step, level end
+        break
+      end
+    end
   end
 
-  -- start from the next line if its indent level its higher
-  if scope_next_indent_level > scope_indent_level then return cursor_line + 1, scope_next_indent_level end
   return cursor_line, scope_indent_level
 end
 

@@ -1,3 +1,29 @@
+## [2.3.0](https://github.com/saghen/blink.indent/compare/v2.2.0..v2.3.0) - 2026-09-09
+
+### Features
+
+- correct indent levels for dedent scoped filetypes ([369d7f2](https://github.com/saghen/blink.indent/commit/369d7f26d338292c7008466eab17c55d42efb55c))
+- avoid overlapping fold text ([1ffe220](https://github.com/saghen/blink.indent/commit/1ffe2204e756b0de26b39bfd7560b5a13834ae08))
+
+### Bug Fixes
+
+- select the scope above closing borders ([01f3072](https://github.com/saghen/blink.indent/commit/01f3072d5261b3e44cef22c4481d25e674d5dd04))
+- honor counts when jumping between scope borders ([6355878](https://github.com/saghen/blink.indent/commit/6355878a049b1fe9a77b4ed6a80ff0bc3dfb15f6))
+- expand repeated scope text objects ([4d44510](https://github.com/saghen/blink.indent/commit/4d44510a28ff0e634c7adb52ccb5ba3d29d59c4a))
+- preserve listchars when drawing over tab indentation ([dddb914](https://github.com/saghen/blink.indent/commit/dddb914542ac6080b7b2689d862f4d9cbde36479))
+- skip unloaded buffers when drawing ([cc11154](https://github.com/saghen/blink.indent/commit/cc111549b8a1f5511f640ba55d681649706b4648))
+
+### Documentation
+
+- update performance estimate ([052eb38](https://github.com/saghen/blink.indent/commit/052eb38f8d4d7c2a911b13dd8ffb4881d25b3061))
+
+### Performance
+
+- fast path dedent scoped filetypes ([8b69b92](https://github.com/saghen/blink.indent/commit/8b69b9262891fe81fe728fe6a52fa2a84dd5d5e0))
+- avoid redundant scope scans ([320e30c](https://github.com/saghen/blink.indent/commit/320e30cdda5539203d4d660af8b29fb35a7a74f2))
+- reduce indentation rendering overhead ([24599fb](https://github.com/saghen/blink.indent/commit/24599fbb0c2a980509f8638a2889b0e2a0def54d))
+- reuse extmark table, skip tab handling when n/a ([e751372](https://github.com/saghen/blink.indent/commit/e751372a6572098901307e27a42f7a4065890b66))
+
 ## [2.2.0](https://github.com/saghen/blink.indent/compare/v2.1.2..v2.2.0) - 2026-06-11
 
 ### Features

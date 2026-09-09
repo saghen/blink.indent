@@ -38,13 +38,14 @@ end
 --- Gets the scope range without any parsing beforehand, for motions/textobjects
 --- @param bufnr? integer
 --- @param winnr? integer
+--- @param line? integer Use this line's indentation without treating it as a scope border
 --- @return blink.indent.ScopeRange scope_range
-function M.get_scope(bufnr, winnr)
+function M.get_scope(bufnr, winnr, line)
   if not bufnr or bufnr == 0 then bufnr = vim.api.nvim_get_current_buf() end
   if not winnr or winnr == 0 then winnr = vim.api.nvim_get_current_win() end
 
   local shiftwidth = utils.get_shiftwidth(bufnr)
-  local cursor_line = vim.api.nvim_win_get_cursor(winnr)[1]
+  local cursor_line = line or vim.api.nvim_win_get_cursor(winnr)[1]
   local line_count = vim.api.nvim_buf_line_count(bufnr)
   local dedent_scoped = indent.is_dedent_scoped(bufnr)
   local start_line, scope_indent_level = M.get_scope_start(
@@ -52,7 +53,8 @@ function M.get_scope(bufnr, winnr)
     winnr,
     cursor_line,
     { start_line = 1, end_line = line_count, horizontal_offset = 0 },
-    shiftwidth
+    shiftwidth,
+    line == nil
   )
 
   -- move up and down to find the scope
@@ -91,9 +93,10 @@ end
 --- @param cursor_line integer
 --- @param range blink.indent.ParseRange
 --- @param shiftwidth integer
+--- @param try_as_border? boolean
 --- @return integer cursor_line
 --- @return integer scope_indent_level
-function M.get_scope_start(bufnr, winnr, cursor_line, range, shiftwidth)
+function M.get_scope_start(bufnr, winnr, cursor_line, range, shiftwidth, try_as_border)
   -- search upward for the first non all-whitespace line
   local scope_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
   local cursor_is_whitespace = is_all_whitespace
@@ -101,6 +104,8 @@ function M.get_scope_start(bufnr, winnr, cursor_line, range, shiftwidth)
     cursor_line = cursor_line - 1
     scope_indent_level, is_all_whitespace = M.get_line_indent_level(bufnr, cursor_line, shiftwidth)
   end
+
+  if try_as_border == false then return cursor_line, scope_indent_level end
 
   -- clamp indent level to cursor
   if config.scope.indent_at_cursor then

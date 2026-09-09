@@ -9,16 +9,14 @@ local M = {}
 --- @param scope_range blink.indent.ScopeRange
 --- @param side "top" | "bottom"
 --- @param border? "top" | "bottom" | "both" | "none"
-local function move_cursor(scope_range, side, border)
-  local target_line = side == 'top' and scope_range.start_line or scope_range.end_line
-  if side == 'top' and (border == 'both' or border == 'top') then
-    target_line = target_line - 1
-  elseif side == 'bottom' and (border == 'both' or border == 'bottom') then
-    target_line = target_line + 1
-  end
-  target_line = math.min(math.max(target_line, 1), vim.fn.line('$'))
+local function get_target_line(scope_range, side, border)
+  local offset = (border == 'both' or border == side) and 1 or 0
+  local target_line = side == 'top' and scope_range.start_line - offset or scope_range.end_line + offset
+  return math.min(math.max(target_line, 1), vim.fn.line('$'))
+end
 
-  vim.api.nvim_win_set_cursor(0, { target_line, 0 })
+local function move_cursor(scope_range, side, border)
+  vim.api.nvim_win_set_cursor(0, { get_target_line(scope_range, side, border), 0 })
   vim.cmd('normal! ^')
 end
 
@@ -38,6 +36,9 @@ function M.operator(side, add_to_jumplist)
 
   return function()
     local scope = parser.get_scope()
+    if get_target_line(scope, side, 'both') == vim.api.nvim_win_get_cursor(0)[1] then
+      scope = parser.get_scope(0, 0, vim.fn.line('.'))
+    end
     if scope.indent_level == 0 then return end
 
     -- needs remembering `count1` before adding to jump list because it seems to reset it to 1
@@ -46,9 +47,9 @@ function M.operator(side, add_to_jumplist)
 
     -- Make sequence of jumps
     for _ = 1, count do
-      move_cursor(scope, side)
+      move_cursor(scope, side, 'both')
 
-      scope = parser.get_scope()
+      scope = parser.get_scope(0, 0, vim.fn.line('.'))
       if scope.indent_level == 0 then return end
     end
   end

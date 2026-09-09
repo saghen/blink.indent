@@ -46,8 +46,9 @@ function M.operator(side, add_to_jumplist)
     if add_to_jumplist then vim.cmd('normal! m`') end
 
     -- Make sequence of jumps
-    for _ = 1, count do
+    for i = 1, count do
       move_cursor(scope, side, 'both')
+      if i == count then break end
 
       scope = parser.get_scope(0, 0, vim.fn.line('.'))
       if scope.indent_level == 0 then return end

@@ -56,6 +56,7 @@ function M.get_scope(bufnr, winnr, line)
     shiftwidth,
     line == nil
   )
+  if scope_indent_level == 0 then return { start_line = 1, end_line = line_count, indent_level = 0 } end
 
   -- move up and down to find the scope
   local scope_start_line = start_line

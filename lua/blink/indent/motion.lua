@@ -66,27 +66,37 @@ function M.textobject(opts)
     local scope = parser.get_scope()
     if scope.indent_level == 0 then return end
 
-    -- Make sequence of incremental selections
-    local count = vim.v.count1
-    for i = 1, count do
-      local border = opts.border
-      if i ~= count then border = 'both' end
-
-      -- finish cursor on border
-      local start, finish = 'top', 'bottom'
-      if border == 'top' then
-        start, finish = 'bottom', 'top'
-      end
-
-      exit_visual_mode()
-      move_cursor(scope, start, border)
-      vim.cmd('normal! V')
-      move_cursor(scope, finish, border)
-
-      -- Use `try_as_border = false` to enable chaining
-      scope = parser.get_scope()
-      if scope.indent_level == 0 then return end
+    local function parent_scope()
+      local line = scope.start_line > 1 and scope.start_line - 1 or scope.end_line + 1
+      if line > vim.fn.line('$') then return nil end
+      local parent = parser.get_scope(0, 0, line)
+      if parent.indent_level == 0 or parent.indent_level >= scope.indent_level then return nil end
+      return parent
     end
+
+    -- Repeated selections must grow beyond the existing visual range
+    if vim.fn.mode() == 'V' then
+      local anchor, cursor = vim.fn.line('v'), vim.fn.line('.')
+      local first, last = math.min(anchor, cursor), math.max(anchor, cursor)
+      while
+        get_target_line(scope, 'top', opts.border) >= first and get_target_line(scope, 'bottom', opts.border) <= last
+      do
+        local parent = parent_scope()
+        if not parent then return end
+        scope = parent
+      end
+    end
+
+    for _ = 2, vim.v.count1 do
+      local parent = parent_scope()
+      if not parent then break end
+      scope = parent
+    end
+
+    exit_visual_mode()
+    move_cursor(scope, 'top', opts.border)
+    vim.cmd('normal! V')
+    move_cursor(scope, 'bottom', opts.border)
   end
 end
 

@@ -77,17 +77,26 @@ end
 function M._get_indent_levels(bufnr, range, shiftwidth, dedent_scoped)
   local indent_levels = {}
   local whitespace = {}
+  local tab_levels = {}
 
   local lines = vim.api.nvim_buf_get_lines(bufnr, range.start_line - 1, range.end_line, false)
   local whitespace_lines_before = 0
   local prev_indent_level = 0
   for line = range.start_line, range.end_line do
-    local indent_level, is_all_whitespace, whitespace_chars =
-      M.get_indent_level(lines[line - range.start_line + 1], shiftwidth, bufnr)
+    local text = lines[line - range.start_line + 1]
+    local whitespace_chars = text:match('^%s*')
+    local indent_level
+    if not whitespace_chars:find('\t', 1, true) then
+      indent_level = math.floor(#whitespace_chars / shiftwidth)
+    else
+      indent_level = tab_levels[whitespace_chars]
+        or math.floor(utils.get_whitespace_width(whitespace_chars, bufnr) / shiftwidth)
+      tab_levels[whitespace_chars] = indent_level
+    end
     indent_levels[line] = indent_level
     whitespace[line] = whitespace_chars
 
-    if is_all_whitespace then
+    if #whitespace_chars == #text then
       whitespace_lines_before = whitespace_lines_before + 1
     else
       local whitespace_indent_level = dedent_scoped and indent_level or math.max(indent_level, prev_indent_level)

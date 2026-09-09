@@ -38,22 +38,24 @@ function M.draw(winnr, bufnr, ns, indent_levels, scope_range, range)
   if win_col < 0 then return end
 
   local breakindent = utils.get_breakindent(winnr)
+  local foldenable = vim.wo[winnr].foldenable
   local symbol = config.scope.char
   local hl_group = utils.get_rainbow_hl(indent_level - 1, config.scope.highlights)
+  local extmark_opts = {
+    virt_text = { { symbol, hl_group } },
+    virt_text_pos = 'overlay',
+    virt_text_win_col = win_col,
+    virt_text_repeat_linebreak = breakindent,
+    hl_mode = 'combine',
+    priority = config.scope.priority,
+  }
 
   -- main draw loop
   -- folds are per-window, wrap so foldclosed() runs on the correct window
   vim.api.nvim_win_call(winnr, function()
     for i = scope_range.start_line, scope_range.end_line do
-      if vim.fn.foldclosed(i) ~= i then
-        vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
-          virt_text = { { symbol, hl_group } },
-          virt_text_pos = 'overlay',
-          virt_text_win_col = win_col,
-          virt_text_repeat_linebreak = breakindent,
-          hl_mode = 'combine',
-          priority = config.scope.priority,
-        })
+      if not foldenable or vim.fn.foldclosed(i) ~= i then
+        vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, extmark_opts)
       end
     end
   end)

@@ -52,21 +52,29 @@ function M.draw(winnr, bufnr, ns, indent_levels, whitespace, range)
   cache_entry.fold_headers = cache_entry.fold_headers or {}
 
   local breakindent = utils.get_breakindent(winnr)
+  local foldenable = vim.wo[winnr].foldenable
   local shiftwidth = utils.get_shiftwidth(bufnr)
-  local space, tabchars = utils.get_listchars(winnr)
-  if config.static.whitespace_char then
-    space, tabchars = config.static.whitespace_char, nil
+  local space, tabchars = config.static.whitespace_char
+  if not space then
+    space, tabchars = utils.get_listchars(winnr)
   end
 
   -- cache the virt text to avoid unnecessary string edit calls
   local virt_text_cache = {}
+  local extmark_opts = {
+    virt_text = { { '', '' } },
+    virt_text_pos = 'overlay',
+    virt_text_repeat_linebreak = breakindent,
+    hl_mode = 'combine',
+    priority = config.static.priority,
+  }
 
   -- main draw loop
   -- folds are per-window, wrap so foldclosed() runs on the correct window
   vim.api.nvim_win_call(winnr, function()
     for line_number = range.start_line, range.end_line do
       local indent_level = indent_levels[line_number]
-      if vim.fn.foldclosed(line_number) == line_number then
+      if foldenable and vim.fn.foldclosed(line_number) == line_number then
         local extmark_id = cache_entry.extmark_ids[line_number]
         if extmark_id ~= nil then
           vim.api.nvim_buf_del_extmark(bufnr, ns, extmark_id)
@@ -78,28 +86,23 @@ function M.draw(winnr, bufnr, ns, indent_levels, whitespace, range)
         and indent_level * shiftwidth > range.horizontal_offset
       then
         cache_entry.fold_headers[line_number] = nil
-        local whitespace_chars = whitespace[line_number]
-        local key = indent_level .. ':' .. whitespace_chars
+        local whitespace_chars = space == ' ' and not tabchars and '' or whitespace[line_number]
+        local key = whitespace_chars == '' and indent_level or indent_level .. ':' .. whitespace_chars
         local virt_text = virt_text_cache[key]
         if not virt_text then
           virt_text = get_virt_text(whitespace_chars, indent_level * shiftwidth, shiftwidth, space, tabchars)
+
+          if range.horizontal_offset > 0 then
+            local symbol_offset_index = vim.str_byteindex(virt_text, 'utf-32', range.horizontal_offset)
+            virt_text = virt_text:sub(symbol_offset_index + 1)
+          end
           virt_text_cache[key] = virt_text
         end
 
-        if range.horizontal_offset > 0 then
-          local symbol_offset_index = vim.str_byteindex(virt_text, 'utf-32', range.horizontal_offset)
-          virt_text = virt_text:sub(symbol_offset_index + 1)
-        end
-
         local hl_group = utils.get_rainbow_hl(indent_level, config.static.highlights)
-        cache_entry.extmark_ids[line_number] = vim.api.nvim_buf_set_extmark(bufnr, ns, line_number - 1, 0, {
-          id = cache_entry.extmark_ids[line_number],
-          virt_text = { { virt_text, hl_group } },
-          virt_text_pos = 'overlay',
-          virt_text_repeat_linebreak = breakindent,
-          hl_mode = 'combine',
-          priority = config.static.priority,
-        })
+        extmark_opts.id = cache_entry.extmark_ids[line_number]
+        extmark_opts.virt_text[1][1], extmark_opts.virt_text[1][2] = virt_text, hl_group
+        cache_entry.extmark_ids[line_number] = vim.api.nvim_buf_set_extmark(bufnr, ns, line_number - 1, 0, extmark_opts)
       end
     end
   end)

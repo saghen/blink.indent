@@ -147,9 +147,7 @@ function M.get_cursor_indent_level(bufnr, winnr, cursor_line, shiftwidth)
   local covers_all_whitespace = #whitespace_chars <= cursor_col - 1
 
   whitespace_chars = whitespace_chars:sub(1, cursor_col)
-  local whitespace_char_count = whitespace_chars:find('\t') ~= nil
-      and whitespace_chars:gsub('\t', (' '):rep(shiftwidth)):len()
-    or whitespace_chars:len()
+  local whitespace_char_count = utils.get_whitespace_width(whitespace_chars, bufnr)
 
   local indent_level = math.ceil(whitespace_char_count / shiftwidth)
   return math.ceil(indent_level), covers_all_whitespace
@@ -161,15 +159,7 @@ end
 --- @return integer indent_level
 --- @return boolean is_all_whitespace
 function M.get_line_indent_level(bufnr, line_number, shiftwidth)
-  local line = utils.get_line(bufnr, line_number)
-
-  local whitespace_chars = line:match('^%s*')
-  --- @cast whitespace_chars string
-  local whitespace_char_count = whitespace_chars:find('\t') ~= nil
-      and whitespace_chars:gsub('\t', (' '):rep(shiftwidth)):len()
-    or whitespace_chars:len()
-
-  return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line
+  return indent.get_indent_level(utils.get_line(bufnr, line_number), shiftwidth, bufnr)
 end
 
 --- @param bufnr integer

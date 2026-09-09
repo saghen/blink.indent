@@ -26,7 +26,7 @@
 --- @field enabled boolean
 --- @field ns integer Namespace of the extmarks used to draw the static guides
 --- @field char '┆' | '┊' | '╎' | '║' | '▏' | '▎' | string Character used to draw the scope guides
---- @field whitespace_char '·' | '␣' | string | nil Character used to draw the whitespace guides. When `nil` (default), uses the value of `vim.opt.listchars:get().space` (see `:h listchars`)
+--- @field whitespace_char '·' | '␣' | string | nil Character used to draw the whitespace guides. When `nil` (default), inherits space/tab characters from 'listchars' when 'list' is enabled (see `:h 'listchars'`)
 --- @field priority integer
 --- @field highlights string[]
 

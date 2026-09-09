@@ -1,6 +1,6 @@
 --- @class blink.indent.CacheEntry
 --- @field indent_levels table<integer, integer>
---- @field whitespace_lens table<integer, integer>
+--- @field whitespace table<integer, string>
 --- @field start_line integer
 --- @field end_line integer
 --- @field horizontal_offset integer
@@ -45,28 +45,26 @@ end
 --- @param bufnr integer
 --- @param range blink.indent.ParseRange
 --- @return table<integer, integer> indent_levels
---- @return table<integer, integer> whitespace_lens
+--- @return table<integer, string> whitespace
 --- @return boolean is_cached
 function M.get_indent_levels(bufnr, range)
   local cache_entry = M.cache[bufnr]
   local shiftwidth = utils.get_shiftwidth(bufnr)
   if cache_entry ~= nil and cache_entry.start_line == range.start_line and cache_entry.end_line == range.end_line then
-    return cache_entry.indent_levels,
-      cache_entry.whitespace_lens,
-      cache_entry.horizontal_offset == range.horizontal_offset
+    return cache_entry.indent_levels, cache_entry.whitespace, cache_entry.horizontal_offset == range.horizontal_offset
   end
 
   local dedent_scoped = M.is_dedent_scoped(bufnr)
-  local indent_levels, whitespace_lens = M._get_indent_levels(bufnr, range, shiftwidth, dedent_scoped)
+  local indent_levels, whitespace = M._get_indent_levels(bufnr, range, shiftwidth, dedent_scoped)
   M.cache[bufnr] = {
     indent_levels = indent_levels,
-    whitespace_lens = whitespace_lens,
+    whitespace = whitespace,
     start_line = range.start_line,
     end_line = range.end_line,
     horizontal_offset = range.horizontal_offset,
   }
 
-  return indent_levels, whitespace_lens, false
+  return indent_levels, whitespace, false
 end
 
 --- @private
@@ -75,19 +73,19 @@ end
 --- @param shiftwidth integer
 --- @param dedent_scoped boolean
 --- @return table<integer, integer> indent_levels
---- @return table<integer, integer> whitespace_lens
+--- @return table<integer, string> whitespace
 function M._get_indent_levels(bufnr, range, shiftwidth, dedent_scoped)
   local indent_levels = {}
-  local whitespace_lens = {}
+  local whitespace = {}
 
   local lines = vim.api.nvim_buf_get_lines(bufnr, range.start_line - 1, range.end_line, false)
   local whitespace_lines_before = 0
   local prev_indent_level = 0
   for line = range.start_line, range.end_line do
-    local indent_level, is_all_whitespace, whitespace_len =
-      M.get_indent_level(lines[line - range.start_line + 1], shiftwidth)
+    local indent_level, is_all_whitespace, whitespace_chars =
+      M.get_indent_level(lines[line - range.start_line + 1], shiftwidth, bufnr)
     indent_levels[line] = indent_level
-    whitespace_lens[line] = whitespace_len
+    whitespace[line] = whitespace_chars
 
     if is_all_whitespace then
       whitespace_lines_before = whitespace_lines_before + 1
@@ -101,22 +99,21 @@ function M._get_indent_levels(bufnr, range, shiftwidth, dedent_scoped)
     end
   end
 
-  return indent_levels, whitespace_lens
+  return indent_levels, whitespace
 end
 
 --- @param line string
 --- @param shiftwidth integer
+--- @param bufnr? integer
 --- @return integer indent_level
 --- @return boolean is_all_whitespace
---- @return integer whitespace_len
-function M.get_indent_level(line, shiftwidth)
+--- @return string whitespace
+function M.get_indent_level(line, shiftwidth, bufnr)
   local whitespace_chars = line:match('^%s*')
   --- @cast whitespace_chars string
-  local whitespace_char_count = whitespace_chars:find('\t') ~= nil
-      and whitespace_chars:gsub('\t', (' '):rep(shiftwidth)):len()
-    or whitespace_chars:len()
+  local whitespace_char_count = utils.get_whitespace_width(whitespace_chars, bufnr)
 
-  return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line, #whitespace_chars
+  return math.floor(whitespace_char_count / shiftwidth), #whitespace_chars == #line, whitespace_chars
 end
 
 --- Get the top and bottom line of the viewport

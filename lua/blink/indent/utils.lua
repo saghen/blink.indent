@@ -8,11 +8,26 @@ function M.get_shiftwidth(bufnr)
   return math.max(shiftwidth, 2)
 end
 
-function M.get_space_listchar(winnr)
-  local listchars = vim.wo[winnr].listchars or vim.o.listchars
-  local space = listchars:match('space:([^,]*)')
-  if space == nil then return ' ' end
-  return space:sub(1, 1 + vim.str_utf_end(space, 1))
+--- @param winnr integer
+--- @return string space
+--- @return string[]? tab
+function M.get_listchars(winnr)
+  if not vim.wo[winnr].list then return ' ' end
+  local listchars = ',' .. vim.wo[winnr].listchars
+  local space = listchars:match(',space:([^,]*)') or ' '
+  local tab = listchars:match(',tab:([^,]*)')
+  return space, tab and vim.fn.split(tab, '\\zs')
+end
+
+--- @param whitespace string
+--- @param bufnr? integer
+--- @return integer
+function M.get_whitespace_width(whitespace, bufnr)
+  if not whitespace:find('\t', 1, true) then return #whitespace end
+  if not bufnr or bufnr == 0 or bufnr == vim.api.nvim_get_current_buf() then
+    return vim.fn.strdisplaywidth(whitespace)
+  end
+  return vim.api.nvim_buf_call(bufnr, function() return vim.fn.strdisplaywidth(whitespace) end)
 end
 
 --- @param winnr integer

@@ -6,13 +6,32 @@ local utils = require('blink.indent.utils')
 --- @type table<integer, { indent_levels: table<integer, integer>, extmark_ids: table<integer, integer>, fold_headers: table<integer, boolean>, horizontal_offset: integer }>
 M.cache = utils.make_buffer_cache()
 
+local function get_virt_text(whitespace, width, shiftwidth, space, tabchars)
+  local chars = {}
+  for char in whitespace:gmatch('.') do
+    local column = #chars
+    if column >= width then break end
+    local char_width = char == '\t' and vim.fn.strdisplaywidth(char, column) or 1
+    for offset = 1, char_width do
+      chars[column + offset] = char == '\t'
+          and tabchars
+          and (offset == char_width and tabchars[3] or (offset == 1 and tabchars[1] or tabchars[2]))
+        or space
+    end
+  end
+  for column = 1, width do
+    chars[column] = (column - 1) % shiftwidth == 0 and config.static.char or chars[column] or ' '
+  end
+  return table.concat(chars, '', 1, width)
+end
+
 --- @param winnr integer
 --- @param bufnr integer
 --- @param ns integer
 --- @param indent_levels table<integer, integer>
---- @param whitespace_lens table<integer, integer>
+--- @param whitespace table<integer, string>
 --- @param range { start_line: integer, end_line: integer, horizontal_offset: integer }
-function M.draw(winnr, bufnr, ns, indent_levels, whitespace_lens, range)
+function M.draw(winnr, bufnr, ns, indent_levels, whitespace, range)
   -- cache the indent levels to avoid unnecessary extmark draws
   if not M.cache[bufnr] or M.cache[bufnr].horizontal_offset ~= range.horizontal_offset then
     vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
@@ -27,11 +46,12 @@ function M.draw(winnr, bufnr, ns, indent_levels, whitespace_lens, range)
 
   local breakindent = utils.get_breakindent(winnr)
   local shiftwidth = utils.get_shiftwidth(bufnr)
-  local space = config.static.whitespace_char or utils.get_space_listchar(winnr)
-  local symbol = config.static.char .. space:rep(shiftwidth - 1)
-  local symbol_plain = config.static.char .. (' '):rep(shiftwidth - 1)
+  local space, tabchars = utils.get_listchars(winnr)
+  if config.static.whitespace_char then
+    space, tabchars = config.static.whitespace_char, nil
+  end
 
-  -- cache the virt text to avoid unnecessary string.rep calls
+  -- cache the virt text to avoid unnecessary string edit calls
   local virt_text_cache = {}
 
   -- main draw loop
@@ -51,24 +71,12 @@ function M.draw(winnr, bufnr, ns, indent_levels, whitespace_lens, range)
         and indent_level * shiftwidth > range.horizontal_offset
       then
         cache_entry.fold_headers[line_number] = nil
-        local virt_text = virt_text_cache[indent_level] or symbol:rep(indent_level)
-        if virt_text_cache[indent_level] == nil then virt_text_cache[indent_level] = virt_text end
-
-        -- indent isn't filled with whitespace, only use the space character for actual whitespace
-        local whitespace_len = whitespace_lens[line_number]
-        if space ~= ' ' and whitespace_len < indent_level * shiftwidth then
-          if whitespace_len == 0 then
-            virt_text = symbol_plain:rep(indent_level)
-          elseif whitespace_len % shiftwidth == 0 then
-            virt_text = symbol:rep(whitespace_len / shiftwidth)
-              .. symbol_plain:rep(indent_level - whitespace_len / shiftwidth)
-          else
-            virt_text = symbol:rep(math.floor(whitespace_len / shiftwidth))
-              .. config.static.char
-              .. space:rep(whitespace_len % shiftwidth - 1)
-              .. (' '):rep(shiftwidth - whitespace_len % shiftwidth)
-              .. symbol_plain:rep(indent_level - math.floor(whitespace_len / shiftwidth) - 1)
-          end
+        local whitespace_chars = whitespace[line_number]
+        local key = indent_level .. ':' .. whitespace_chars
+        local virt_text = virt_text_cache[key]
+        if not virt_text then
+          virt_text = get_virt_text(whitespace_chars, indent_level * shiftwidth, shiftwidth, space, tabchars)
+          virt_text_cache[key] = virt_text
         end
 
         if range.horizontal_offset > 0 then
